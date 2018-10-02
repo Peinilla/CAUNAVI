@@ -105,7 +105,7 @@ public class ObjectRenderer {
   private final float[] modelRotate = new float[16];
 
 
-    public float modelAngle;
+  public float modelAngle;
   // 회전각
 
   // Set some default material properties to use for lighting.
@@ -124,11 +124,11 @@ public class ObjectRenderer {
    * @param diffuseTextureAssetName Name of the PNG file containing the diffuse texture map.
    */
   public void createOnGlThread(Context context, String objAssetName, String diffuseTextureAssetName)
-      throws IOException {
+          throws IOException {
     final int vertexShader =
-        ShaderUtil.loadGLShader(TAG, context, GLES20.GL_VERTEX_SHADER, VERTEX_SHADER_NAME);
+            ShaderUtil.loadGLShader(TAG, context, GLES20.GL_VERTEX_SHADER, VERTEX_SHADER_NAME);
     final int fragmentShader =
-        ShaderUtil.loadGLShader(TAG, context, GLES20.GL_FRAGMENT_SHADER, FRAGMENT_SHADER_NAME);
+            ShaderUtil.loadGLShader(TAG, context, GLES20.GL_FRAGMENT_SHADER, FRAGMENT_SHADER_NAME);
 
     program = GLES20.glCreateProgram();
     GLES20.glAttachShader(program, vertexShader);
@@ -150,20 +150,20 @@ public class ObjectRenderer {
     lightingParametersUniform = GLES20.glGetUniformLocation(program, "u_LightingParameters");
     materialParametersUniform = GLES20.glGetUniformLocation(program, "u_MaterialParameters");
     colorCorrectionParameterUniform =
-        GLES20.glGetUniformLocation(program, "u_ColorCorrectionParameters");
+            GLES20.glGetUniformLocation(program, "u_ColorCorrectionParameters");
     colorUniform = GLES20.glGetUniformLocation(program, "u_ObjColor");
 
     ShaderUtil.checkGLError(TAG, "Program parameters");
     // Read the texture.
     Bitmap textureBitmap =
-        BitmapFactory.decodeStream(context.getAssets().open(diffuseTextureAssetName));
+            BitmapFactory.decodeStream(context.getAssets().open(diffuseTextureAssetName));
 
     GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
     GLES20.glGenTextures(textures.length, textures, 0);
     GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textures[0]);
 
     GLES20.glTexParameteri(
-        GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR_MIPMAP_LINEAR);
+            GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR_MIPMAP_LINEAR);
     GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
     GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, textureBitmap, 0);
     GLES20.glGenerateMipmap(GLES20.GL_TEXTURE_2D);
@@ -196,9 +196,9 @@ public class ObjectRenderer {
 
     // Convert int indices to shorts for GL ES 2.0 compatibility
     ShortBuffer indices =
-        ByteBuffer.allocateDirect(2 * wideIndices.limit())
-            .order(ByteOrder.nativeOrder())
-            .asShortBuffer();
+            ByteBuffer.allocateDirect(2 * wideIndices.limit())
+                    .order(ByteOrder.nativeOrder())
+                    .asShortBuffer();
     while (wideIndices.hasRemaining()) {
       indices.put((short) wideIndices.get());
     }
@@ -218,18 +218,18 @@ public class ObjectRenderer {
     GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vertexBufferId);
     GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, totalBytes, null, GLES20.GL_STATIC_DRAW);
     GLES20.glBufferSubData(
-        GLES20.GL_ARRAY_BUFFER, verticesBaseAddress, 4 * vertices.limit(), vertices);
+            GLES20.GL_ARRAY_BUFFER, verticesBaseAddress, 4 * vertices.limit(), vertices);
     GLES20.glBufferSubData(
-        GLES20.GL_ARRAY_BUFFER, texCoordsBaseAddress, 4 * texCoords.limit(), texCoords);
+            GLES20.GL_ARRAY_BUFFER, texCoordsBaseAddress, 4 * texCoords.limit(), texCoords);
     GLES20.glBufferSubData(
-        GLES20.GL_ARRAY_BUFFER, normalsBaseAddress, 4 * normals.limit(), normals);
+            GLES20.GL_ARRAY_BUFFER, normalsBaseAddress, 4 * normals.limit(), normals);
     GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
 
     // Load index buffer
     GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, indexBufferId);
     indexCount = indices.limit();
     GLES20.glBufferData(
-        GLES20.GL_ELEMENT_ARRAY_BUFFER, 2 * indexCount, indices, GLES20.GL_STATIC_DRAW);
+            GLES20.GL_ELEMENT_ARRAY_BUFFER, 2 * indexCount, indices, GLES20.GL_STATIC_DRAW);
     GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
 
     ShaderUtil.checkGLError(TAG, "OBJ buffer load");
@@ -275,7 +275,7 @@ public class ObjectRenderer {
    *     highlight.
    */
   public void setMaterialProperties(
-      float ambient, float diffuse, float specular, float specularPower) {
+          float ambient, float diffuse, float specular, float specularPower) {
     this.ambient = ambient;
     this.diffuse = diffuse;
     this.specular = specular;
@@ -299,10 +299,10 @@ public class ObjectRenderer {
   }
 
   public void draw(
-      float[] cameraView,
-      float[] cameraPerspective,
-      float[] colorCorrectionRgba,
-      float[] objColor) {
+          float[] cameraView,
+          float[] cameraPerspective,
+          float[] colorCorrectionRgba,
+          float[] objColor) {
 
     ShaderUtil.checkGLError(TAG, "Before draw");
 
@@ -322,11 +322,11 @@ public class ObjectRenderer {
     Matrix.multiplyMV(viewLightDirection, 0, modelViewMatrix, 0, LIGHT_DIRECTION, 0);
     normalizeVec3(viewLightDirection);
     GLES20.glUniform4f(
-        lightingParametersUniform,
-        viewLightDirection[0],
-        viewLightDirection[1],
-        viewLightDirection[2],
-        1.f);
+            lightingParametersUniform,
+            viewLightDirection[0],
+            viewLightDirection[1],
+            viewLightDirection[2],
+            1.f);
     GLES20.glUniform4fv(colorCorrectionParameterUniform, 1, colorCorrectionRgba, 0);
 
     // Set the object color property.
@@ -344,10 +344,10 @@ public class ObjectRenderer {
     GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vertexBufferId);
 
     GLES20.glVertexAttribPointer(
-        positionAttribute, COORDS_PER_VERTEX, GLES20.GL_FLOAT, false, 0, verticesBaseAddress);
+            positionAttribute, COORDS_PER_VERTEX, GLES20.GL_FLOAT, false, 0, verticesBaseAddress);
     GLES20.glVertexAttribPointer(normalAttribute, 3, GLES20.GL_FLOAT, false, 0, normalsBaseAddress);
     GLES20.glVertexAttribPointer(
-        texCoordAttribute, 2, GLES20.GL_FLOAT, false, 0, texCoordsBaseAddress);
+            texCoordAttribute, 2, GLES20.GL_FLOAT, false, 0, texCoordsBaseAddress);
 
     GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
 
@@ -402,11 +402,18 @@ public class ObjectRenderer {
     v[2] *= reciprocalLength;
   }
   private void setScale(){
-      Matrix.scaleM(modelMatrix,0,0.1f,0.1f,0.1f);
-      //Matrix.multiplyMM(modelMatrix,0,modelRotate,0,modelScale,0);
+    Matrix.scaleM(modelMatrix,0,0.1f,0.1f,0.1f);
+    //Matrix.multiplyMM(modelMatrix,0,modelRotate,0,modelScale,0);
   }
   private void setRotation() {
-    //Matrix.setRotateM(modelMatrix,0,modelAngle++,0.5f,0,0);
+    float[] tempM = new float[16];
+
+    Matrix.setIdentityM(tempM,0);
+    Matrix.setIdentityM(modelRotate,0);
+
+    Matrix.setRotateM(modelRotate,0,modelAngle++,0.5f,0,0);
+
+    Matrix.multiplyMM(modelMatrix,0,modelMatrix,0,modelRotate,0);
 
   }
 }
