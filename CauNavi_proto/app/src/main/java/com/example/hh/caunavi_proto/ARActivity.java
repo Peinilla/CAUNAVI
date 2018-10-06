@@ -2,8 +2,10 @@ package com.example.hh.caunavi_proto;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
+import android.opengl.Matrix;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -74,6 +76,8 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
     // Temporary matrix allocated here to reduce number of allocations for each frame.
     private final float[] anchorMatrix = new float[16];
     private static final float[] DEFAULT_COLOR = new float[] {0f, 0f, 0f, 0f};
+
+    int count = 0;
 
     // Anchors created from taps used for object placing with a given color.
     private static class ColoredAnchor {
@@ -231,7 +235,7 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
             planeRenderer.createOnGlThread(/*context=*/ this, "models/trigrid.png");
             pointCloudRenderer.createOnGlThread(/*context=*/ this);
 
-            virtualObject.createOnGlThread(/*context=*/ this, "models/arrow4.obj", "models/arrow4.png");
+            virtualObject.createOnGlThread(/*context=*/ this, "models/arrow.obj", "models/arrow4.png");
             virtualObject.setMaterialProperties(0.0f, 2.0f, 0.5f, 6.0f);
 
             virtualObjectShadow.createOnGlThread(
@@ -290,6 +294,23 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
             float[] viewmtx = new float[16];
             camera.getViewMatrix(viewmtx, 0);
 
+            /*
+            if(count%15 == 0) {
+                String str1 = "\n\nproj : ";
+                for (int inx = 0; inx < projmtx.length; inx++) {
+                    str1 += projmtx[inx] + " / ";
+                }
+                Log.i("test", str1);
+
+                String str2 = "view : ";
+                for (int inx = 0; inx < viewmtx.length; inx++) {
+                    str2 += viewmtx[inx] + " / ";
+                }
+                //Log.i("test", str2);
+            }
+            count++;
+            */
+
             // Compute lighting from average intensity of the image.
             // The first three components are color scaling factors.
             // The last one is the average pixel intensity in gamma space.
@@ -331,10 +352,26 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
 
                 // Update and draw the model and its shadow.
                 virtualObject.updateModelMatrix(anchorMatrix, scaleFactor);
+
                 //virtualObjectShadow.updateModelMatrix(anchorMatrix, scaleFactor);
                 virtualObject.draw(viewmtx, projmtx, colorCorrectionRgba, coloredAnchor.color);
                 //virtualObjectShadow.draw(viewmtx, projmtx, colorCorrectionRgba, coloredAnchor.color);
+
+                if(count%15 == 0) {
+                    String str1 = "\n\nanchor : ";
+                    for (int inx = 0; inx < projmtx.length; inx++) {
+                        str1 += anchorMatrix[inx] + " / ";
+                    }
+                    Log.i("test", str1);
+                }
+                count++;
             }
+
+            float[] testMatrix = new float[] {1f, 0f, -0.2f , 0f , 0f , 1.0f , 0f , 0.0f , 0.2f , 0f , 1f , 0.0f , 0f , -0.2f , -0.5f , 1.0f};
+            //Matrix.setIdentityM(testMatrix,0);
+            virtualObject.updateModelMatrix(testMatrix, scaleFactor);
+            virtualObject.draw(viewmtx, projmtx, colorCorrectionRgba, new float[] {66.0f, 133.0f, 244.0f, 255.0f});
+
         } catch (Throwable t) {
             // Avoid crashing the application due to unhandled exceptions.
             Log.e(TAG, "Exception on the OpenGL thread", t);

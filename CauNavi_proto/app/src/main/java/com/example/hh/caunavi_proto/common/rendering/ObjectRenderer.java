@@ -235,6 +235,7 @@ public class ObjectRenderer {
     ShaderUtil.checkGLError(TAG, "OBJ buffer load");
 
     Matrix.setIdentityM(modelMatrix, 0);
+
   }
 
 
@@ -258,10 +259,9 @@ public class ObjectRenderer {
   public void updateModelMatrix(float[] modelMatrix, float scaleFactor) {
     float[] scaleMatrix = new float[16];
     Matrix.setIdentityM(scaleMatrix, 0);
-    //scaleMatrix[0] = scaleFactor;
-    //scaleMatrix[5] = scaleFactor;
-    //scaleMatrix[10] = scaleFactor;
-    Matrix.scaleM(scaleMatrix,0,0.1f,0.1f,0.1f);
+    scaleMatrix[0] = scaleFactor;
+    scaleMatrix[5] = scaleFactor;
+    scaleMatrix[10] = scaleFactor;
     Matrix.multiplyMM(this.modelMatrix, 0, modelMatrix, 0, scaleMatrix, 0);
   }
 
@@ -306,6 +306,15 @@ public class ObjectRenderer {
 
     ShaderUtil.checkGLError(TAG, "Before draw");
 
+      float[] scaleMatrix = new float[16];
+      Matrix.setIdentityM(scaleMatrix, 0);
+      Matrix.scaleM(scaleMatrix,0,0.1f,0.1f,0.1f);
+      Matrix.multiplyMM(modelMatrix, 0, modelMatrix, 0, scaleMatrix, 0);
+
+    ////////// 화살표가 정면을 향하게
+    Matrix.setIdentityM(modelRotate,0);
+    Matrix.setRotateM(modelRotate,0,90,1f,0f,0f);
+    Matrix.multiplyMM(modelMatrix,0,modelMatrix,0,modelRotate,0);
 
     ///
     setRotation();
@@ -406,12 +415,9 @@ public class ObjectRenderer {
       //Matrix.multiplyMM(modelMatrix,0,modelRotate,0,modelScale,0);
   }
   private void setRotation() {
-    float[] tempM = new float[16];
-
-    Matrix.setIdentityM(tempM,0);
     Matrix.setIdentityM(modelRotate,0);
 
-    Matrix.setRotateM(modelRotate,0,modelAngle++,0.5f,0,0);
+    Matrix.setRotateM(modelRotate,0,modelAngle++,0f,0.5f,0);
 
     Matrix.multiplyMM(modelMatrix,0,modelMatrix,0,modelRotate,0);
 

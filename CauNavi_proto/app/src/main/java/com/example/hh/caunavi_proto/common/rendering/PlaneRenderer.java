@@ -401,7 +401,7 @@ public class PlaneRenderer {
     GLES20.glDepthMask(true);
 
     ShaderUtil.checkGLError(TAG, "Cleaning up after drawing planes");
-  }
+}
 
   // Calculate the normal distance to plane from cameraPose, the given planePose should have y axis
   // parallel to plane's normal, for example plane's center pose or hit test pose.
