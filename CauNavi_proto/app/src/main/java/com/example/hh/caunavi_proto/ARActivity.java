@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.google.ar.core.Anchor;
@@ -79,6 +80,8 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
 
     int count = 0;
 
+    private ArrayList<float[]> testList = new ArrayList<>();
+
     // Anchors created from taps used for object placing with a given color.
     private static class ColoredAnchor {
         public final Anchor anchor;
@@ -113,6 +116,13 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         installRequested = false;
 
         gps = new GpsManager(this,(TextView)findViewById(R.id.gpsText));
+
+        findViewById(R.id.button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                testClick(view);
+            }
+        });
     }
 
     @Override
@@ -367,10 +377,10 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
                 count++;
             }
 
-            float[] testMatrix = new float[] {1f, 0f, -0.2f , 0f , 0f , 1.0f , 0f , 0.0f , 0.2f , 0f , 1f , 0.0f , 0f , -0.2f , -0.5f , 1.0f};
-            //Matrix.setIdentityM(testMatrix,0);
-            virtualObject.updateModelMatrix(testMatrix, scaleFactor);
-            virtualObject.draw(viewmtx, projmtx, colorCorrectionRgba, new float[] {66.0f, 133.0f, 244.0f, 255.0f});
+            for(int inx = 0; inx < testList.size(); inx ++) {
+                virtualObject.updateModelMatrix(testList.get(inx), scaleFactor);
+                virtualObject.draw(viewmtx, projmtx, colorCorrectionRgba, new float[]{66.0f, 133.0f, 244.0f, 255.0f});
+            }
 
         } catch (Throwable t) {
             // Avoid crashing the application due to unhandled exceptions.
@@ -413,12 +423,16 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
                     }
 
                     // Adding an Anchor tells ARCore that it should track this position in
-                    // space. This anchor is created on the Plane to place the 3D model
+                    // space. This anchor is     created on the Plane to place the 3D model
                     // in the correct position relative both to the world and to the plane.
                     anchors.add(new ColoredAnchor(hit.createAnchor(), objColor));
                     break;
                 }
             }
         }
+    }
+
+    public void testClick(View v){
+        testList.add(new float[] {1f, 0f, -0.2f , 0f , 0f , 1.0f , 0f , 0.0f , 0.2f , 0f , 1f , 0.0f , 0f , -0.2f , -0.5f , 1.0f});
     }
 }
