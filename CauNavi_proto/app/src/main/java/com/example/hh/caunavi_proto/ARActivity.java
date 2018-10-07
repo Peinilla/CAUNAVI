@@ -367,8 +367,14 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
                 count++;
             }
 
-            float[] testMatrix = new float[] {1f, 0f, -0.2f , 0f , 0f , 1.0f , 0f , 0.0f , 0.2f , 0f , 1f , 0.0f , 0f , -0.2f , -0.5f , 1.0f};
+            //float[] testMatrix = new float[] {1f, 0f, -0.2f , 0f , 0f , 1.0f , 0f , 0.0f , 0.2f , 0f , 1f , 0.0f , 0f , -0.2f , -0.5f , 1.0f};
             //Matrix.setIdentityM(testMatrix,0);
+            
+            float[] testMatrix = new float[16];
+            
+            Matrix.setIdentityM(testMatrix, 0);
+            Matrix.translateM(testMatrix, 0, 0.0f, 0.0f, -0.2f);
+            
             virtualObject.updateModelMatrix(testMatrix, scaleFactor);
             virtualObject.draw(viewmtx, projmtx, colorCorrectionRgba, new float[] {66.0f, 133.0f, 244.0f, 255.0f});
 
