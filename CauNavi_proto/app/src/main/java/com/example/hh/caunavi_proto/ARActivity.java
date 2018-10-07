@@ -82,6 +82,9 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
 
     private ArrayList<float[]> testList = new ArrayList<>();
 
+    float[] projmtx = new float[16];
+    float[] viewmtx = new float[16];
+
     // Anchors created from taps used for object placing with a given color.
     private static class ColoredAnchor {
         public final Anchor anchor;
@@ -116,7 +119,6 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         installRequested = false;
 
         gps = new GpsManager(this,(TextView)findViewById(R.id.gpsText));
-
         findViewById(R.id.button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -297,21 +299,18 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
             }
 
             // Get projection matrix.
-            float[] projmtx = new float[16];
             camera.getProjectionMatrix(projmtx, 0, 0.1f, 100.0f);
 
             // Get camera matrix and draw.
-            float[] viewmtx = new float[16];
             camera.getViewMatrix(viewmtx, 0);
 
-            /*
+            // projmxt, viewmtx 확인용 로그
             if(count%15 == 0) {
                 String str1 = "\n\nproj : ";
                 for (int inx = 0; inx < projmtx.length; inx++) {
                     str1 += projmtx[inx] + " / ";
                 }
-                Log.i("test", str1);
-
+                //Log.i("test", str1);
                 String str2 = "view : ";
                 for (int inx = 0; inx < viewmtx.length; inx++) {
                     str2 += viewmtx[inx] + " / ";
@@ -319,7 +318,7 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
                 //Log.i("test", str2);
             }
             count++;
-            */
+
 
             // Compute lighting from average intensity of the image.
             // The first three components are color scaling factors.
@@ -362,19 +361,9 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
 
                 // Update and draw the model and its shadow.
                 virtualObject.updateModelMatrix(anchorMatrix, scaleFactor);
-
                 //virtualObjectShadow.updateModelMatrix(anchorMatrix, scaleFactor);
                 virtualObject.draw(viewmtx, projmtx, colorCorrectionRgba, coloredAnchor.color);
                 //virtualObjectShadow.draw(viewmtx, projmtx, colorCorrectionRgba, coloredAnchor.color);
-
-                if(count%15 == 0) {
-                    String str1 = "\n\nanchor : ";
-                    for (int inx = 0; inx < projmtx.length; inx++) {
-                        str1 += anchorMatrix[inx] + " / ";
-                    }
-                    Log.i("test", str1);
-                }
-                count++;
             }
 
             for(int inx = 0; inx < testList.size(); inx ++) {
@@ -423,7 +412,7 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
                     }
 
                     // Adding an Anchor tells ARCore that it should track this position in
-                    // space. This anchor is     created on the Plane to place the 3D model
+                    // space. This anchor is created on the Plane to place the 3D model
                     // in the correct position relative both to the world and to the plane.
                     anchors.add(new ColoredAnchor(hit.createAnchor(), objColor));
                     break;
@@ -433,6 +422,19 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
     }
 
     public void testClick(View v){
-        testList.add(new float[] {1f, 0f, -0.2f , 0f , 0f , 1.0f , 0f , 0.0f , 0.2f , 0f , 1f , 0.0f , 0f , -0.2f , -0.5f , 1.0f});
+
+        float[] testMatrix = new float[16];
+        float[] tempM = new float[16];
+
+        Matrix.setIdentityM(testMatrix, 0);
+        Matrix.translateM(testMatrix, 0, 0.0f, -0.2f, -0.2f);
+
+        Matrix.setIdentityM(tempM, 0);
+        //Matrix.multiplyMM(tempM,0,projmtx, 0 , testMatrix, 0);
+
+        Matrix.invertM(tempM,0,viewmtx,0);
+        Matrix.multiplyMM(tempM,0,tempM,0,new float[] {0.1f, 0f, 0f, 0f, 0f, 0f, 0.1f, 0f, 0f, -0.1f, 0f, 0f, 0f, 0f, -0.5f, 1f}, 0);
+        testList.add(tempM);
+        //testList.add(new float[] {1f, 0f, -0.2f , 0f , 0f , 1.0f , 0f , 0.0f , 0.2f , 0f , 1f , 0.0f , 0f , -0.2f , -0.5f , 1.0f});
     }
 }

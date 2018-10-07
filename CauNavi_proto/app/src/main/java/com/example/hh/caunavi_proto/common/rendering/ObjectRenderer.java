@@ -20,6 +20,8 @@ import android.graphics.BitmapFactory;
 import android.opengl.GLES20;
 import android.opengl.GLUtils;
 import android.opengl.Matrix;
+import android.util.Log;
+
 import de.javagl.obj.Obj;
 import de.javagl.obj.ObjData;
 import de.javagl.obj.ObjReader;
@@ -105,8 +107,10 @@ public class ObjectRenderer {
   private final float[] modelRotate = new float[16];
 
 
-    public float modelAngle;
+    private float modelAngle;
   // 회전각
+
+    int count = 0;
 
   // Set some default material properties to use for lighting.
   private float ambient = 0.3f;
@@ -305,17 +309,18 @@ public class ObjectRenderer {
       float[] objColor) {
 
     ShaderUtil.checkGLError(TAG, "Before draw");
-
+  /*
       float[] scaleMatrix = new float[16];
       Matrix.setIdentityM(scaleMatrix, 0);
       Matrix.scaleM(scaleMatrix,0,0.1f,0.1f,0.1f);
       Matrix.multiplyMM(modelMatrix, 0, modelMatrix, 0, scaleMatrix, 0);
-
+*/
     ////////// 화살표가 정면을 향하게
+    /*
     Matrix.setIdentityM(modelRotate,0);
     Matrix.setRotateM(modelRotate,0,90,1f,0f,0f);
     Matrix.multiplyMM(modelMatrix,0,modelMatrix,0,modelRotate,0);
-
+*/
     ///
     setRotation();
     /// 회전
@@ -325,6 +330,19 @@ public class ObjectRenderer {
     Matrix.multiplyMM(modelViewMatrix, 0, cameraView, 0, modelMatrix, 0);
     Matrix.multiplyMM(modelViewProjectionMatrix, 0, cameraPerspective, 0, modelViewMatrix, 0);
 
+    //
+    ///
+    ///
+      if(count %30 == 0) {
+          String str1 = new String();
+          String str2 = new String();
+          for (int inx = 0; inx < 16; inx++) {
+              str1 += modelViewMatrix[inx] + "/\t";
+              str2 += modelViewProjectionMatrix[inx] + "/\t";
+          }
+          Log.i("test", str1 + "\n" + str2);
+      }
+      count++;
     GLES20.glUseProgram(program);
 
     // Set the lighting environment properties.
