@@ -3,10 +3,6 @@ package com.example.hh.caunavi_proto;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
@@ -50,9 +46,6 @@ import com.google.ar.core.exceptions.UnavailableSdkTooOldException;
 import com.google.ar.core.exceptions.UnavailableUserDeclinedInstallationException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
@@ -88,18 +81,9 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
     int count = 0;
 
     private ArrayList<float[]> testList = new ArrayList<>();
-    private ArrayList<Float> rotateList = new ArrayList<>();
 
     float[] projmtx = new float[16];
     float[] viewmtx = new float[16];
-
-
-    private float[] accelValue;
-    private float[] magneticValue;
-
-    private float headingAngle;
-    private float pitchAngle;
-    private float rollAngle;
 
     // Anchors created from taps used for object placing with a given color.
     private static class ColoredAnchor {
@@ -133,53 +117,6 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         surfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
 
         installRequested = false;
-
-
-        SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-
-        SensorEventListener mListener = new SensorEventListener() {
-            @Override
-            public void onSensorChanged(SensorEvent sensorEvent) {
-                float[] v = sensorEvent.values;
-
-                switch (sensorEvent.sensor.getType()){
-                    case Sensor.TYPE_ACCELEROMETER:
-                        accelValue = v;
-                        break;
-                    case Sensor.TYPE_MAGNETIC_FIELD:
-                        magneticValue = v;
-                        break;
-
-                }
-
-                if(accelValue != null && magneticValue != null){
-                    float[] values = new float[3];
-                    float[] mr = new float[9];
-
-                    SensorManager.getRotationMatrix(mr, null, accelValue, magneticValue);
-                    SensorManager.getOrientation(mr, values);
-                    headingAngle = (float) Math.toDegrees(values[0]);
-                    pitchAngle = (float) Math.toDegrees(values[1]);
-                    rollAngle = (float) Math.toDegrees(values[2]);
-
-                }
-            }
-
-            @Override
-            public void onAccuracyChanged(Sensor sensor, int i) {
-
-            }
-        };
-
-
-        sensorManager.registerListener(mListener,
-                sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
-                SensorManager.SENSOR_DELAY_UI);
-
-        sensorManager.registerListener(mListener,
-                sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD),
-                sensorManager.SENSOR_DELAY_UI);
-
 
         gps = new GpsManager(this,(TextView)findViewById(R.id.gpsText));
         findViewById(R.id.button).setOnClickListener(new View.OnClickListener() {
@@ -242,7 +179,6 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
                 exception = e;
             }
 
-
             if (message != null) {
                 messageSnackbarHelper.showError(this, message);
                 Log.e(TAG, "Exception creating session", exception);
@@ -265,7 +201,7 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         surfaceView.onResume();
         displayRotationHelper.onResume();
 
-        //messageSnackbarHelper.showMessage(this, "Searching for surfaces...");
+        messageSnackbarHelper.showMessage(this, "Searching for surfaces...");
     }
 
     @Override
@@ -374,12 +310,12 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
                 for (int inx = 0; inx < projmtx.length; inx++) {
                     str1 += projmtx[inx] + " / ";
                 }
-                Log.i("test", str1);
+                //Log.i("test", str1);
                 String str2 = "view : ";
                 for (int inx = 0; inx < viewmtx.length; inx++) {
                     str2 += viewmtx[inx] + " / ";
                 }
-                Log.i("test", str2);
+                //Log.i("test", str2);
             }
             count++;
 
@@ -399,7 +335,7 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
             // using it.
             pointCloud.release();
 
-            /* / Check if we detected at least one plane. If so, hide the loading message.
+            // Check if we detected at least one plane. If so, hide the loading message.
             if (messageSnackbarHelper.isShowing()) {
                 for (Plane plane : session.getAllTrackables(Plane.class)) {
                     if (plane.getTrackingState() == TrackingState.TRACKING) {
@@ -407,11 +343,7 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
                         break;
                     }
                 }
-            } */
-
-            SensorManager sensorManager;
-            sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-
+            }
 
             // Visualize planes.
             planeRenderer.drawPlanes(session.getAllTrackables(Plane.class), camera.getDisplayOrientedPose(), projmtx);
@@ -494,7 +426,6 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         float[] testMatrix = new float[16];
         float[] tempM = new float[16];
 
-
         Matrix.setIdentityM(testMatrix, 0);
         Matrix.translateM(testMatrix, 0, 0.0f, -0.2f, -0.2f);
 
@@ -503,12 +434,6 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
 
         Matrix.invertM(tempM,0,viewmtx,0);
         Matrix.multiplyMM(tempM,0,tempM,0,new float[] {0.1f, 0f, 0f, 0f, 0f, 0f, 0.1f, 0f, 0f, -0.1f, 0f, 0f, 0f, 0f, -0.5f, 1f}, 0);
-
-        if (headingAngle < 0)
-            headingAngle += 360;
-
-        Matrix.rotateM(tempM, 0, headingAngle, 0.0f, 0.0f, -1.0f);
-
         testList.add(tempM);
         //testList.add(new float[] {1f, 0f, -0.2f , 0f , 0f , 1.0f , 0f , 0.0f , 0.2f , 0f , 1f , 0.0f , 0f , -0.2f , -0.5f , 1.0f});
     }

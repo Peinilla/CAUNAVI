@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -50,8 +49,6 @@ public class GpsManager extends Service implements LocationListener {
         getLocation();
         gpsText = t;
     }
-
-
 
     @TargetApi(23)
     public Location getLocation() {

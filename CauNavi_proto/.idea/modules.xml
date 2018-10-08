@@ -2,10 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/CAUNAVI-CauNavi_proto.iml" filepath="$PROJECT_DIR$/CAUNAVI-CauNavi_proto.iml" />
       <module fileurl="file://$PROJECT_DIR$/CauNavi_proto.iml" filepath="$PROJECT_DIR$/CauNavi_proto.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/CauNavi_proto-app.iml" filepath="$PROJECT_DIR$/app/CauNavi_proto-app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/obj-0.3.0/CauNavi_proto-obj-0.3.0.iml" filepath="$PROJECT_DIR$/obj-0.3.0/CauNavi_proto-obj-0.3.0.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/obj-0.3.0/obj-0.3.0.iml" filepath="$PROJECT_DIR$/obj-0.3.0/obj-0.3.0.iml" />
     </modules>
