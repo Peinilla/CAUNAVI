@@ -370,6 +370,7 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
             camera.getViewMatrix(viewmtx, 0);
 
             // projmxt, viewmtx 확인용 로그
+            /*
             if(count%15 == 0) {
                 String str1 = "\n\nproj : ";
                 for (int inx = 0; inx < projmtx.length; inx++) {
@@ -383,6 +384,7 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
                 Log.i("test", str2);
             }
             count++;
+            */
 
 
             // Compute lighting from average intensity of the image.
@@ -506,8 +508,9 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         Matrix.invertM(tempM,0,viewmtx,0);
         Matrix.multiplyMM(tempM,0,tempM,0,new float[] {0.1f, 0f, 0f, 0f, 0f, 0f, 0.1f, 0f, 0f, -0.1f, 0f, 0f, 0f, 0f, -0.5f, 1f}, 0);
 
-        if (headingAngle < 0)
+        if (headingAngle < 0) {
             headingAngle += 360;
+        }
 
         Matrix.rotateM(tempM, 0, headingAngle, 0.0f, 0.0f, -1.0f);
 
