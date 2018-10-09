@@ -100,6 +100,8 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
     private float pitchAngle;
     private float rollAngle;
 
+    private float modelAngle;
+
     // Anchors created from taps used for object placing with a given color.
     private static class ColoredAnchor {
         public final Anchor anchor;
@@ -392,7 +394,7 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
             // Visualize tracked points.
             PointCloud pointCloud = frame.acquirePointCloud();
             pointCloudRenderer.update(pointCloud);
-            pointCloudRenderer.draw(viewmtx, projmtx);
+            //pointCloudRenderer.draw(viewmtx, projmtx);
 
             // Application is responsible for releasing the point cloud resources after
             // using it.
@@ -413,7 +415,7 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
 
 
             // Visualize planes.
-            planeRenderer.drawPlanes(session.getAllTrackables(Plane.class), camera.getDisplayOrientedPose(), projmtx);
+            //planeRenderer.drawPlanes(session.getAllTrackables(Plane.class), camera.getDisplayOrientedPose(), projmtx);
             //
 
             // Visualize anchors created by touch.
@@ -427,16 +429,17 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
                 coloredAnchor.anchor.getPose().toMatrix(anchorMatrix, 0);
 
                 // Update and draw the model and its shadow.
-                virtualObject.updateModelMatrix(anchorMatrix, scaleFactor);
+                virtualObject.updateModelMatrix(anchorMatrix, scaleFactor,modelAngle);
                 //virtualObjectShadow.updateModelMatrix(anchorMatrix, scaleFactor);
                 virtualObject.draw(viewmtx, projmtx, colorCorrectionRgba, coloredAnchor.color);
                 //virtualObjectShadow.draw(viewmtx, projmtx, colorCorrectionRgba, coloredAnchor.color);
             }
 
             for(int inx = 0; inx < testList.size(); inx ++) {
-                virtualObject.updateModelMatrix(testList.get(inx), scaleFactor);
+                virtualObject.updateModelMatrix(testList.get(inx), scaleFactor,modelAngle);
                 virtualObject.draw(viewmtx, projmtx, colorCorrectionRgba, new float[]{66.0f, 133.0f, 244.0f, 255.0f});
             }
+            modelAngle++;
 
         } catch (Throwable t) {
             // Avoid crashing the application due to unhandled exceptions.

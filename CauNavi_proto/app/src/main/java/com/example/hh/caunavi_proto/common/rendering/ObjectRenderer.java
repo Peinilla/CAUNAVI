@@ -104,7 +104,6 @@ public class ObjectRenderer {
   private final float[] modelViewProjectionMatrix = new float[16];
 
   private final float[] modelScale = new float[16];
-  private final float[] modelRotate = new float[16];
 
 
     private float modelAngle;
@@ -260,13 +259,18 @@ public class ObjectRenderer {
    * @param scaleFactor A separate scaling factor to apply before the {@code modelMatrix}.
    * @see android.opengl.Matrix
    */
-  public void updateModelMatrix(float[] modelMatrix, float scaleFactor) {
+  public void updateModelMatrix(float[] modelMatrix, float scaleFactor, float modelAngle) {
     float[] scaleMatrix = new float[16];
     Matrix.setIdentityM(scaleMatrix, 0);
     scaleMatrix[0] = scaleFactor;
     scaleMatrix[5] = scaleFactor;
     scaleMatrix[10] = scaleFactor;
     Matrix.multiplyMM(this.modelMatrix, 0, modelMatrix, 0, scaleMatrix, 0);
+
+      ///
+      this.modelAngle = modelAngle;
+      setRotation();
+      /// 회전
   }
 
   /**
@@ -294,7 +298,7 @@ public class ObjectRenderer {
    * @param lightIntensity Illumination intensity. Combined with diffuse and specular material
    *     properties.
    * @see #setBlendMode(BlendMode)
-   * @see #updateModelMatrix(float[], float)
+   * @see #updateModelMatrix(float[], float, float)
    * @see #setMaterialProperties(float, float, float, float)
    * @see android.opengl.Matrix
    */
@@ -321,9 +325,6 @@ public class ObjectRenderer {
     Matrix.setRotateM(modelRotate,0,90,1f,0f,0f);
     Matrix.multiplyMM(modelMatrix,0,modelMatrix,0,modelRotate,0);
 */
-    ///
-    setRotation();
-    /// 회전
 
     // Build the ModelView and ModelViewProjection matrices
     // for calculating object position and light.
@@ -433,11 +434,11 @@ public class ObjectRenderer {
       //Matrix.multiplyMM(modelMatrix,0,modelRotate,0,modelScale,0);
   }
   private void setRotation() {
+    float[] modelRotate = new float[16];
     Matrix.setIdentityM(modelRotate,0);
 
-    Matrix.setRotateM(modelRotate,0,modelAngle++,0f,0.5f,0);
+    Matrix.setRotateM(modelRotate,0,modelAngle,0f,1f,0f);
 
     Matrix.multiplyMM(modelMatrix,0,modelMatrix,0,modelRotate,0);
-
   }
 }
