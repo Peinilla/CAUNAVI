@@ -24,6 +24,7 @@ public class GpsManager extends Service implements LocationListener {
     private final Context mContext;
 
     private TextView gpsText;
+
     // 현재 GPS 사용유무
     boolean isGPSEnabled = false;
 
@@ -41,7 +42,7 @@ public class GpsManager extends Service implements LocationListener {
     private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 1;
 
     // 최소 GPS 정보 업데이트 시간 밀리세컨이므로 1분
-    private static final long MIN_TIME_BW_UPDATES = 250;
+    private static final long MIN_TIME_BW_UPDATES = 100;
 
     protected LocationManager locationManager;
 
