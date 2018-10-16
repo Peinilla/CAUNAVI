@@ -192,17 +192,24 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
 
         mapManager = new MapManager(this);
         ///
-        mapManager.setDestination(0); // 테스트용
+        mapManager.setDestination(0,gps.lat,gps.lon); // 테스트용
         ///
         timerTask = new TimerTask() {
             @Override
             public void run() {
-                setArrow(mapManager.getNextPointBearing(gps.lat,gps.lon));
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(gps.isGetLocation) {
+                            setArrow(mapManager.getNextPointBearing(gps.lat, gps.lon));
+                        }
+                    }
+                });
             }
         };
 
         timer = new Timer();
-        timer.schedule(timerTask,5000,2000);
+        timer.schedule(timerTask,5000,3000);
     }
 
     @Override
@@ -557,7 +564,7 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
             headingAngle += 360;
         }
         Matrix.setIdentityM(tMatrix, 0);
-        Matrix.translateM(tMatrix, 0, 0f, -0.2f, -0.8f);
+        Matrix.translateM(tMatrix, 0, 0f, -0.2f, -1.2f);
 
         Matrix.setIdentityM(rMatrix,0);
         //Matrix.translateM(tMatrix, 0, (float)Math.sin(270 + headingAngle), -0.2f, -(float)Math.cos(270 + headingAngle));
@@ -568,6 +575,11 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         Matrix.invertM(tempM,0,viewmtx,0);
         Matrix.multiplyMM(tempM,0,tempM,0,tMatrix, 0);
 
-        testList.add(tempM);
+        if(testList.size() <= 10) {
+            testList.add(tempM);
+        }else{
+            testList.remove(0);
+            testList.add(tempM);
+        }
     }
 }

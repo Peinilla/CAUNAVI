@@ -38,10 +38,10 @@ public class GpsManager extends Service implements LocationListener {
     double lat; // 위도
     double lon; // 경도
 
-    // 최소 GPS 정보 업데이트 거리 10미터
+    // 최소 GPS 정보 업데이트 거리 1미터
     private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 1;
 
-    // 최소 GPS 정보 업데이트 시간 밀리세컨이므로 1분
+    // 최소 GPS 정보 업데이트 시간 밀리세컨이므로 1초
     private static final long MIN_TIME_BW_UPDATES = 100;
 
     protected LocationManager locationManager;
@@ -131,7 +131,7 @@ public class GpsManager extends Service implements LocationListener {
     }
 
     public void onLocationChanged(Location location) {
-        String str = "위도 : " + location.getLatitude() + "\n경도 : " + location.getLongitude();
+        String str = "신뢰도 : " + location.getAccuracy();
 
         gpsText.setText(str);
 

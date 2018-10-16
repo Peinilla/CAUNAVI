@@ -4,6 +4,9 @@ import android.content.Context;
 import android.content.res.AssetManager;
 import android.location.Location;
 import android.util.Log;
+import android.widget.Toast;
+
+import com.example.hh.caunavi_proto.common.helpers.SnackbarHelper;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -12,12 +15,16 @@ import java.util.ArrayList;
 
 public class MapManager {
 
-    Context mContext;
+    private Context mContext;
     private ArrayList<mapData> mapDataArrayList = new ArrayList<>();
     private ArrayList<Integer> route = new ArrayList<>();
+
+    private final SnackbarHelper messageSnackbarHelper = new SnackbarHelper();
+
     private int destinationID;
-    private int currentID;
-    private int distanceToCurrentID;
+    private int nearPointID;
+    private int nextPointID;
+    private int prevPointID;
 
     public class mapData {
         Location location = new Location("map");
@@ -48,16 +55,27 @@ public class MapManager {
 
             bufrd.close();
             is.close();
-
         }catch (Exception e){
             Log.i("test", e.getMessage());
         }
+        init();
+    }
+    public void init() {
+        destinationID = -1;
+        nearPointID = -1;
+        nextPointID = -1;
+        prevPointID = -1;
     }
 
-    public void setDestination(int destinationID){
+    public void setDestination(int destinationID, double lat, double lon){
+        init();
         this.destinationID = destinationID;
+        setNearPointID(lat,lon);
+        nextPointID = nearPointID;
+        prevPointID = nearPointID;
 
         // 테스트용
+        this.destinationID = 9;
         route.add(0);
         route.add(1);
         route.add(2);
@@ -66,53 +84,63 @@ public class MapManager {
         route.add(5);
         route.add(6);
         route.add(7);
+        route.add(8);
+        route.add(9);
         //
     }
 
-    public void setCurrentID(double lat, double lon){
+    public void setNearPointID(double lat, double lon){
         Location tempLoc = new Location("temp");
         tempLoc.setLatitude(lat);
         tempLoc.setLongitude(lon);
 
         int distance = Integer.MAX_VALUE;
-        int currentID = -1;
+        int nearID = -1;
 
         for(int inx = 0; inx < mapDataArrayList.size(); inx ++ ){
             int tempDis = (int)mapDataArrayList.get(inx).location.distanceTo(tempLoc);
             if(distance > tempDis){
                 distance = tempDis;
-                currentID = mapDataArrayList.get(inx).id;
+                nearID = mapDataArrayList.get(inx).id;
             }
         }
-        if(currentID != -1){
-            this.currentID = currentID;
-            distanceToCurrentID = distance;
+        if(nearID != -1){
+            nearPointID = nearID;
         }
         //위도와 경도를 이용해 현재위치와 가장 가까운 지점의 ID를 설정
     }
 
     public float getNextPointBearing(double lat, double lon){
-        setCurrentID(lat,lon);
+        setNearPointID(lat,lon);
 
         Location tempLoc = new Location("temp");
         tempLoc.setLatitude(lat);
         tempLoc.setLongitude(lon);
 
-        int nextPoint = getnextPoint();
-        return tempLoc.bearingTo(mapDataArrayList.get(nextPoint).location);
-    }
+        int distNext = (int) tempLoc.distanceTo(mapDataArrayList.get(nextPointID).location);
+        if(distNext > 8){
+            if(nextPointID != nearPointID && prevPointID != nearPointID){
+                setDestination(destinationID,lat,lon); // 경로 재설정
+                return getNextPointBearing(lat,lon);
+            } else{
+                String nameNext = mapDataArrayList.get(nearPointID).name;
+                Toast.makeText(mContext.getApplicationContext(), nameNext + " 까지 " + distNext + "m", Toast.LENGTH_SHORT ).show();
 
+                return tempLoc.bearingTo(mapDataArrayList.get(nextPointID).location);
+            }
+        }else{
+            prevPointID = nextPointID;
+            nextPointID = getnextPoint();
+            return tempLoc.bearingTo(mapDataArrayList.get(nextPointID).location);
+        }
+    }
     public int getnextPoint(){
         for(int inx = 0; inx < route.size(); inx ++){
-            if(route.get(inx) == currentID){
+            if(route.get(inx) == nearPointID){
                 return route.get(inx + 1);
             }
-            else{
-                //현재 위치가 경로에 없을 경우, 경로 재탐색
-            }
         }
-        Log.i("test","현재 위치 ID : " + currentID);
-        return currentID;
+        return nearPointID;
     }
 }
 
