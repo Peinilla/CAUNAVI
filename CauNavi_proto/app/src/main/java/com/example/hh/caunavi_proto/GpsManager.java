@@ -28,9 +28,6 @@ public class GpsManager extends Service implements LocationListener {
     // 현재 GPS 사용유무
     boolean isGPSEnabled = false;
 
-    // 네트워크 사용유무
-    boolean isNetworkEnabled = false;
-
     // GPS 상태값
     boolean isGetLocation = false;
 
@@ -42,7 +39,7 @@ public class GpsManager extends Service implements LocationListener {
     private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 1;
 
     // 최소 GPS 정보 업데이트 시간 밀리세컨이므로 1초
-    private static final long MIN_TIME_BW_UPDATES = 100;
+    private static final long MIN_TIME_BW_UPDATES = 1000;
 
     protected LocationManager locationManager;
 
@@ -75,45 +72,21 @@ public class GpsManager extends Service implements LocationListener {
             isGPSEnabled = locationManager
                     .isProviderEnabled(LocationManager.GPS_PROVIDER);
 
-            // 현재 네트워크 상태 값 알아오기
-            isNetworkEnabled = locationManager
-                    .isProviderEnabled(LocationManager.NETWORK_PROVIDER);
 
-            if (!isGPSEnabled && !isNetworkEnabled) {
-                // GPS 와 네트워크사용이 가능하지 않을때 소스 구현
-            } else {
-                this.isGetLocation = true;
-                // 네트워크 정보로 부터 위치값 가져오기
-                if (isNetworkEnabled) {
+            if (isGPSEnabled) {
+
+                if (location == null) {
                     locationManager.requestLocationUpdates(
-                            LocationManager.NETWORK_PROVIDER,
+                            LocationManager.GPS_PROVIDER,
                             MIN_TIME_BW_UPDATES,
                             MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
-
                     if (locationManager != null) {
                         location = locationManager
-                                .getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+                                .getLastKnownLocation(LocationManager.GPS_PROVIDER);
                         if (location != null) {
-                            // 위도 경도 저장
+                            this.isGetLocation = true;
                             lat = location.getLatitude();
                             lon = location.getLongitude();
-                        }
-                    }
-                }
-
-                if (isGPSEnabled) {
-                    if (location == null) {
-                        locationManager.requestLocationUpdates(
-                                LocationManager.GPS_PROVIDER,
-                                MIN_TIME_BW_UPDATES,
-                                MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
-                        if (locationManager != null) {
-                            location = locationManager
-                                    .getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                            if (location != null) {
-                                lat = location.getLatitude();
-                                lon = location.getLongitude();
-                            }
                         }
                     }
                 }
@@ -131,11 +104,11 @@ public class GpsManager extends Service implements LocationListener {
     }
 
     public void onLocationChanged(Location location) {
-        String str = "신뢰도 : " + location.getAccuracy();
+        lat = location.getLatitude();
+        lon = location.getLongitude();
 
+        String str = String.format("%.6f , %.6f /// %d",lat,lon,(int)location.getAccuracy());
         gpsText.setText(str);
-
-
     }
 
     public void onStatusChanged(String provider, int status, Bundle extras) {

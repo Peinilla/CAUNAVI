@@ -123,10 +123,12 @@ public class MapManager {
                 setDestination(destinationID,lat,lon); // 경로 재설정
                 return getNextPointBearing(lat,lon);
             } else{
-                String nameNext = mapDataArrayList.get(nearPointID).name;
-                Toast.makeText(mContext.getApplicationContext(), nameNext + " 까지 " + distNext + "m", Toast.LENGTH_SHORT ).show();
-
-                return tempLoc.bearingTo(mapDataArrayList.get(nextPointID).location);
+                String nameNext = mapDataArrayList.get(nextPointID).name;
+                float bearing = tempLoc.bearingTo(mapDataArrayList.get(nextPointID).location);
+                Toast toast = new Toast(mContext.getApplicationContext());
+                toast.cancel();
+                toast.makeText(mContext.getApplicationContext(), nameNext + "/" + distNext + "m / " + bearing, Toast.LENGTH_SHORT ).show();
+                return bearing;
             }
         }else{
             prevPointID = nextPointID;
