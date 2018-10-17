@@ -102,6 +102,8 @@ public class MapManager {
         return tempLoc.bearingTo(mapDataArrayList.get(nextPoint).location);
     }
 
+
+
     public int getnextPoint(){
         for(int inx = 0; inx < route.size(); inx ++){
             if(route.get(inx) == currentID){

@@ -519,8 +519,10 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         Matrix.setIdentityM(tMatrix, 0);
         Matrix.translateM(tMatrix, 0, 0f, -0.2f, -0.8f);
 
+
         Matrix.setIdentityM(rMatrix,0);
         switch (v.getId()){
+
             case R.id.ar_1 :
                 //Matrix.translateM(tMatrix, 0, (float)Math.sin(90 - headingAngle), -0.2f, -(float)Math.cos(90 - headingAngle));
                 Matrix.setRotateM(rMatrix,0,headingAngle - 90,0f,1f,0f); // 화살표가 동으로
