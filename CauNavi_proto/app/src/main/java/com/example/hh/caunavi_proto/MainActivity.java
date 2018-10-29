@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -15,6 +16,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onClick(View v){
+
         switch (v.getId()){
             case R.id.button3 :
                 Intent intent=new Intent(MainActivity.this,ARActivity.class);
@@ -23,6 +25,7 @@ public class MainActivity extends AppCompatActivity {
             case R.id.button4 :
                 break;
             case R.id.button5 :
+                startActivity(new Intent(MainActivity.this,InfoActivity.class));
                 break;
         }
     }

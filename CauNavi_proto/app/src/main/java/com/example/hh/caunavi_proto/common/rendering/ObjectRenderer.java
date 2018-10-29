@@ -272,7 +272,7 @@ public class ObjectRenderer {
     setRotation();
 
     Matrix.setIdentityM(scaleMatrix, 0);
-    Matrix.scaleM(scaleMatrix,0,0.1f,0.1f,0.1f);
+    Matrix.scaleM(scaleMatrix,0,0.3f,0.3f,0.3f);
     Matrix.multiplyMM(this.modelMatrix, 0, this.modelMatrix, 0, scaleMatrix, 0);
 
     ////////// 화살표가 정면을 향하게

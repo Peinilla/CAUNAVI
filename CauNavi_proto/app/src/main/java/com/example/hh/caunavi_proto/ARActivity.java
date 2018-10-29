@@ -139,6 +139,13 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
 
         installRequested = false;
 
+        angleText = (TextView)findViewById(R.id.headangle);
+        angleText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                testClick(view);
+            }
+        });
 
         SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 
@@ -167,7 +174,7 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
                     pitchAngle = (float) Math.toDegrees(values[1]);
                     rollAngle = (float) Math.toDegrees(values[2]);
 
-                    angleText = (TextView)findViewById(R.id.headangle);
+
                     angleText.setText((String.valueOf(headingAngle)));
                 }
             }
@@ -192,17 +199,24 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
 
         mapManager = new MapManager(this);
         ///
-        mapManager.setDestination(0); // 테스트용
+        mapManager.setDestination(0,gps.lat,gps.lon); // 테스트용
         ///
         timerTask = new TimerTask() {
             @Override
             public void run() {
-                setArrow(mapManager.getNextPointBearing(gps.lat,gps.lon));
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(gps.isGetLocation) {
+                            setArrow(mapManager.getNextBearingTest(gps.lat, gps.lon));
+                        }
+                    }
+                });
             }
         };
 
         timer = new Timer();
-        timer.schedule(timerTask,5000,2000);
+        timer.schedule(timerTask,5000,3000);
     }
 
     @Override
@@ -508,20 +522,40 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
     }
 
     public void testClick(View v){
-
+        int viewId;
         float[] tMatrix = new float[16];
         float[] rMatrix = new float[16];
         float[] tempM = new float[16];
 
-        if (headingAngle < 0) {
-            headingAngle += 360;
+        if (rollAngle < -90 || rollAngle > 90){ // 사용자가 핸드폰을 들고 하늘을 바라볼때
+            if (headingAngle < 0 ) {
+                headingAngle += 180;
+            }
+            else {
+                headingAngle -= 180;
+            }
+            pitchAngle = pitchAngle*(-1) - 90;
         }
-        Matrix.setIdentityM(tMatrix, 0);
-        Matrix.translateM(tMatrix, 0, 0f, -0.2f, -0.8f);
+        else{// 사용자가 핸드폰을 들고 땅을 바라볼때
+            headingAngle += 360;
+            pitchAngle += 90;
+        }
+        // else headingAngle += 360;
 
+        if ((headingAngle < 90 && headingAngle > -90) || headingAngle > 270)
+            pitchAngle *= -1;
+
+
+        Matrix.setIdentityM(tMatrix, 0);
+        Matrix.translateM(tMatrix, 0, 0f, 0.0f, -1.8f);
+
+        if (v.getId() == R.id.headangle)
+            viewId = R.id.ar_4;
+        else
+            viewId = v.getId();
 
         Matrix.setIdentityM(rMatrix,0);
-        switch (v.getId()){
+        switch (viewId){
 
             case R.id.ar_1 :
                 //Matrix.translateM(tMatrix, 0, (float)Math.sin(90 - headingAngle), -0.2f, -(float)Math.cos(90 - headingAngle));
@@ -538,10 +572,13 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
             case R.id.ar_4 :
                 //Matrix.translateM(tMatrix, 0, (float)Math.sin(360 - headingAngle), -0.2f, -(float)Math.cos(360 - headingAngle));
                 Matrix.setRotateM(rMatrix,0,headingAngle,0f,1f,0f); // 화살표가 북으로
-                Log.i("test","방위 : " + mapManager.getNextPointBearing(gps.lat,gps.lon));
+                Log.i("test","방위 : " + mapManager.getNextBearingTest(gps.lat,gps.lon));
                 break;
         }
         Matrix.multiplyMM(tMatrix,0,tMatrix,0,rMatrix,0);
+
+        Matrix.setRotateM(rMatrix, 0, pitchAngle, -1.0f, 0.0f, 0.0f);
+        Matrix.multiplyMM(tMatrix, 0, tMatrix, 0, rMatrix, 0);
 
         Matrix.setIdentityM(tempM, 0);
         Matrix.invertM(tempM,0,viewmtx,0);
@@ -555,21 +592,48 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         float[] rMatrix = new float[16];
         float[] tempM = new float[16];
 
-        if (headingAngle < 0) {
-            headingAngle += 360;
-        }
         Matrix.setIdentityM(tMatrix, 0);
-        Matrix.translateM(tMatrix, 0, 0f, -0.2f, -0.8f);
+        Matrix.translateM(tMatrix, 0, 0f, -0.2f, -1.2f);
 
         Matrix.setIdentityM(rMatrix,0);
         //Matrix.translateM(tMatrix, 0, (float)Math.sin(270 + headingAngle), -0.2f, -(float)Math.cos(270 + headingAngle));
+
+        if (rollAngle < -90 || rollAngle > 90){ // 사용자가 핸드폰을 들고 하늘을 바라볼때
+            if (headingAngle < 0 ) {
+                headingAngle += 180;
+            }
+            else {
+                headingAngle -= 180;
+            }
+            pitchAngle = pitchAngle*(-1) - 90;
+        }
+        else{// 사용자가 핸드폰을 들고 땅을 바라볼때
+            headingAngle += 360;
+            pitchAngle += 90;
+        }
+        // else headingAngle += 360;
+
+        if ((headingAngle < 90 && headingAngle > -90) || headingAngle > 270)
+            pitchAngle *= -1;
+
+
+
         Matrix.setRotateM(rMatrix,0,headingAngle - destinationAngle,0f,1f,0f); // 화살표가 동으로
         Matrix.multiplyMM(tMatrix,0,tMatrix,0,rMatrix,0);
+
+        Matrix.setRotateM(rMatrix, 0, pitchAngle, -1.0f, 0.0f, 0.0f);
+        Matrix.multiplyMM(tMatrix, 0, tMatrix, 0, rMatrix, 0);
+
 
         Matrix.setIdentityM(tempM, 0);
         Matrix.invertM(tempM,0,viewmtx,0);
         Matrix.multiplyMM(tempM,0,tempM,0,tMatrix, 0);
 
-        testList.add(tempM);
+        if(testList.size() <= 10) {
+            testList.add(tempM);
+        }else{
+            testList.remove(0);
+            testList.add(tempM);
+        }
     }
 }
