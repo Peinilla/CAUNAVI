@@ -26,6 +26,8 @@ public class MapManager {
     private int nextPointID;
     private int prevPointID;
 
+    private static Toast mToast;
+
     public class mapData {
         Location location = new Location("map");
         int id;
@@ -36,6 +38,7 @@ public class MapManager {
         mContext = context;
         AssetManager am = mContext.getResources().getAssets();
         InputStream is =  null;
+        Toast mToast = new Toast(mContext.getApplicationContext());
 
         try{
             is = am.open("map/backGate_to_208.txt");
@@ -125,9 +128,11 @@ public class MapManager {
             } else{
                 String nameNext = mapDataArrayList.get(nextPointID).name;
                 float bearing = tempLoc.bearingTo(mapDataArrayList.get(nextPointID).location);
-                Toast toast = new Toast(mContext.getApplicationContext());
-                toast.cancel();
-                toast.makeText(mContext.getApplicationContext(), nameNext + "/" + distNext + "m / " + bearing, Toast.LENGTH_SHORT ).show();
+                if(mToast != null) {
+                    mToast.cancel();
+                }
+                mToast = Toast.makeText(mContext.getApplicationContext(),nameNext + "/" + distNext + "m"  , Toast.LENGTH_SHORT);
+                mToast.show();
                 return bearing;
             }
         }else{
@@ -136,6 +141,46 @@ public class MapManager {
             return tempLoc.bearingTo(mapDataArrayList.get(nextPointID).location);
         }
     }
+
+    // 현재 위치에서 다음목적지가 아닌, 지나온 목적지에서 다음 목적지로
+    public float getNextBearingTest(double lat, double lon){
+        setNearPointID(lat,lon);
+
+        Location tempLoc = new Location("temp");
+        tempLoc.setLatitude(lat);
+        tempLoc.setLongitude(lon);
+
+        int distNext = (int) tempLoc.distanceTo(mapDataArrayList.get(nextPointID).location);
+        if(distNext > 8){
+            if(nextPointID != nearPointID && prevPointID != nearPointID){
+                setDestination(destinationID,lat,lon); // 경로 재설정
+                return getNextBearingTest(lat,lon);
+            } else if(prevPointID == nextPointID){
+                String nameNext = mapDataArrayList.get(nextPointID).name;
+                float bearing = tempLoc.bearingTo(mapDataArrayList.get(nextPointID).location);
+                if(mToast != null) {
+                    mToast.cancel();
+                }
+                mToast = Toast.makeText(mContext.getApplicationContext(),nameNext + "/" + distNext + "m"  , Toast.LENGTH_SHORT);
+                mToast.show();
+                return bearing;
+            }else{
+                String nameNext = mapDataArrayList.get(nextPointID).name;
+                float bearing = mapDataArrayList.get(prevPointID).location.bearingTo(mapDataArrayList.get(nextPointID).location);
+                if(mToast != null) {
+                    mToast.cancel();
+                }
+                mToast = Toast.makeText(mContext.getApplicationContext(),nameNext + "/" + distNext + "m"  , Toast.LENGTH_SHORT);
+                mToast.show();
+                return bearing;
+            }
+        }else{
+            prevPointID = nextPointID;
+            nextPointID = getnextPoint();
+            return tempLoc.bearingTo(mapDataArrayList.get(nextPointID).location);
+        }
+    }
+
     public int getnextPoint(){
         for(int inx = 0; inx < route.size(); inx ++){
             if(route.get(inx) == nearPointID){

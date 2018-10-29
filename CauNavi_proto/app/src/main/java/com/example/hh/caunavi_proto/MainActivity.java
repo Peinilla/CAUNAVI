@@ -4,7 +4,8 @@ import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Toast;
+import com.example.hh.caunavi_proto.common.helpers.BuildingDataHelper;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -13,6 +14,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        BuildingDataHelper bdh = new BuildingDataHelper(this);
     }
 
     public void onClick(View v){

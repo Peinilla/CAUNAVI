@@ -201,7 +201,7 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
                     @Override
                     public void run() {
                         if(gps.isGetLocation) {
-                            setArrow(mapManager.getNextPointBearing(gps.lat, gps.lon));
+                            setArrow(mapManager.getNextBearingTest(gps.lat, gps.lon));
                         }
                     }
                 });
