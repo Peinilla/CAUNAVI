@@ -155,7 +155,16 @@ public class MapManager {
             if(nextPointID != nearPointID && prevPointID != nearPointID){
                 setDestination(destinationID,lat,lon); // 경로 재설정
                 return getNextBearingTest(lat,lon);
-            } else{
+            } else if(prevPointID == nextPointID){
+                String nameNext = mapDataArrayList.get(nextPointID).name;
+                float bearing = tempLoc.bearingTo(mapDataArrayList.get(nextPointID).location);
+                if(mToast != null) {
+                    mToast.cancel();
+                }
+                mToast = Toast.makeText(mContext.getApplicationContext(),nameNext + "/" + distNext + "m"  , Toast.LENGTH_SHORT);
+                mToast.show();
+                return bearing;
+            }else{
                 String nameNext = mapDataArrayList.get(nextPointID).name;
                 float bearing = mapDataArrayList.get(prevPointID).location.bearingTo(mapDataArrayList.get(nextPointID).location);
                 if(mToast != null) {
@@ -181,4 +190,5 @@ public class MapManager {
         return nearPointID;
     }
 }
+
 
