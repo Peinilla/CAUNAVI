@@ -51,4 +51,16 @@ public class BuildingDataHelper {
 
         Log.i("test", buildingData.get(20).Text);
     }
+
+    public BuildingData getBuildingData(int id){
+        BuildingData d = new BuildingData();
+
+        for(int inx = 0; inx < buildingData.size(); inx ++){
+            if(id == buildingData.get(inx).ID){
+                d = buildingData.get(inx);
+            }
+        }
+
+        return  d;
+    }
 }
