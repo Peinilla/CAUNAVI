@@ -41,7 +41,7 @@ public class MapManager {
         Toast mToast = new Toast(mContext.getApplicationContext());
 
         try{
-            is = am.open("map/backGate_to_208.txt");
+            is = am.open("map/backGate_to_CentralLibrary.txt");
             BufferedReader bufrd = new BufferedReader(new InputStreamReader(is,"UTF-8"));
 
             String line = bufrd.readLine();
@@ -78,7 +78,7 @@ public class MapManager {
         prevPointID = nearPointID;
 
         // 테스트용
-        this.destinationID = 9;
+        this.destinationID = 12;
         route.add(0);
         route.add(1);
         route.add(2);
@@ -89,6 +89,9 @@ public class MapManager {
         route.add(7);
         route.add(8);
         route.add(9);
+        route.add(10);
+        route.add(11);
+        route.add(12);
         //
     }
 
