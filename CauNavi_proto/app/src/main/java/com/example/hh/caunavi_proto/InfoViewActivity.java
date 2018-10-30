@@ -48,7 +48,7 @@ public class InfoViewActivity extends AppCompatActivity {
         content = (TextView)findViewById(R.id.textView2);
         imgV = (ImageView)findViewById(R.id.imageView);
 
-        name.setText(d.getName());
+        name.setText(""+ ID +"관\n"+d.getName());
         content.setText(d.getText());
 
         String path = "img/"+d.getImageStr();
