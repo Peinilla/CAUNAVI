@@ -140,12 +140,6 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         installRequested = false;
 
         angleText = (TextView)findViewById(R.id.headangle);
-        angleText.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                testClick(view);
-            }
-        });
 
         SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 
@@ -592,12 +586,6 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         float[] rMatrix = new float[16];
         float[] tempM = new float[16];
 
-        Matrix.setIdentityM(tMatrix, 0);
-        Matrix.translateM(tMatrix, 0, 0f, -0.2f, -1.2f);
-
-        Matrix.setIdentityM(rMatrix,0);
-        //Matrix.translateM(tMatrix, 0, (float)Math.sin(270 + headingAngle), -0.2f, -(float)Math.cos(270 + headingAngle));
-
         if (rollAngle < -90 || rollAngle > 90){ // 사용자가 핸드폰을 들고 하늘을 바라볼때
             if (headingAngle < 0 ) {
                 headingAngle += 180;
@@ -617,11 +605,17 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
             pitchAngle *= -1;
 
 
+        Matrix.setIdentityM(tMatrix, 0);
+        Matrix.translateM(tMatrix, 0, 0f, 0.2f, -3.0f);
+
+        Matrix.setIdentityM(rMatrix,0);
+        //Matrix.translateM(tMatrix, 0, (float)Math.sin(270 + headingAngle), -0.2f, -(float)Math.cos(270 + headingAngle));
+
 
         Matrix.setRotateM(rMatrix,0,headingAngle - destinationAngle,0f,1f,0f); // 화살표가 동으로
         Matrix.multiplyMM(tMatrix,0,tMatrix,0,rMatrix,0);
 
-        Matrix.setRotateM(rMatrix, 0, pitchAngle, -1.0f, 0.0f, 0.0f);
+        Matrix.setRotateM(rMatrix, 0, pitchAngle, -2.0f, 0.0f, 0.0f);
         Matrix.multiplyMM(tMatrix, 0, tMatrix, 0, rMatrix, 0);
 
 
