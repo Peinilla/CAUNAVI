@@ -159,28 +159,30 @@ public class MapManager {
                 setDestination(destinationID,lat,lon); // 경로 재설정
                 return getNextBearingTest(lat,lon);
             } else if(prevPointID == nextPointID){
+                String namePrev = mapDataArrayList.get(prevPointID).name;
                 String nameNext = mapDataArrayList.get(nextPointID).name;
                 float bearing = tempLoc.bearingTo(mapDataArrayList.get(nextPointID).location);
                 if(mToast != null) {
                     mToast.cancel();
                 }
-                mToast = Toast.makeText(mContext.getApplicationContext(),nameNext + "/" + distNext + "m"  , Toast.LENGTH_SHORT);
+                mToast = Toast.makeText(mContext.getApplicationContext(),nameNext + "\n" + distNext + "m"  , Toast.LENGTH_SHORT);
                 mToast.show();
                 return bearing;
             }else{
+                String namePrev = mapDataArrayList.get(prevPointID).name;
                 String nameNext = mapDataArrayList.get(nextPointID).name;
                 float bearing = mapDataArrayList.get(prevPointID).location.bearingTo(mapDataArrayList.get(nextPointID).location);
                 if(mToast != null) {
                     mToast.cancel();
                 }
-                mToast = Toast.makeText(mContext.getApplicationContext(),nameNext + "/" + distNext + "m"  , Toast.LENGTH_SHORT);
+                mToast = Toast.makeText(mContext.getApplicationContext(),namePrev + "->" + nameNext + "\n" + distNext + "m"  , Toast.LENGTH_SHORT);
                 mToast.show();
                 return bearing;
             }
         }else{
             prevPointID = nextPointID;
             nextPointID = getnextPoint();
-            return tempLoc.bearingTo(mapDataArrayList.get(nextPointID).location);
+            return getNextBearingTest(lat,lon);
         }
     }
 

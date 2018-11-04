@@ -33,13 +33,17 @@
         <activity
             android:name=".ARActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
+        <activity android:name=".InfoActivity" />
+        <activity android:name=".InfoViewActivity" />
+        <activity android:name=".NaviPopupActivity"
+            android:theme="@android:style/Theme.DeviceDefault.Dialog.NoActionBar">
+        </activity>
 
         <meta-data
             android:name="com.google.ar.core"
             android:value="required" />
 
-        <activity android:name=".InfoActivity" />
-        <activity android:name=".InfoViewActivity"></activity>
+
     </application>
 
 </manifest>
