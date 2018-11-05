@@ -20,6 +20,7 @@ import java.util.ArrayList;
 public class BuildingDataHelper {
     Context mContext;
     ArrayList<BuildingData> buildingData;
+    private static BuildingDataHelper instance;
 
     public BuildingDataHelper(Context context) {
         mContext = context;
@@ -46,9 +47,25 @@ public class BuildingDataHelper {
             reader.close();
             is.close();
         } catch (Exception e) {
-            Log.i("test", e.getMessage());
+        }
+    }
+
+    public BuildingData getBuildingData(int id){
+        BuildingData d = new BuildingData();
+
+        for(int inx = 0; inx < buildingData.size(); inx ++){
+            if(id == buildingData.get(inx).ID){
+                d = buildingData.get(inx);
+            }
         }
 
-        Log.i("test", buildingData.get(20).Text);
+        return  d;
+    }
+
+    public static BuildingDataHelper getInstance(Context context) {
+        if(instance == null){
+            instance = new BuildingDataHelper(context);
+        }
+        return instance;
     }
 }

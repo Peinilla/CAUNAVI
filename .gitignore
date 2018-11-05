@@ -34,13 +34,18 @@ captures/
 
 # IntelliJ
 *.iml
+CauNavi_proto/.idea/libraries/
 CauNavi_proto/.idea/workspace.xml
 CauNavi_proto/.idea/tasks.xml
-CauNavi_proto/.idea/gradle.xml
-CauNavi_proto/.idea/assetWizardSettings.xml
-CauNavi_proto/.idea/dictionaries
-CauNavi_proto/.idea/libraries
-CauNavi_proto/.idea/caches
+CauNavi_proto/.idea/.name
+CauNavi_proto/.idea/compiler.xml
+CauNavi_proto/.idea/copyright/profiles_settings.xml
+CauNavi_proto/.idea/encodings.xml
+CauNavi_proto/.idea/misc.xml
+CauNavi_proto/.idea/modules.xml
+CauNavi_proto/.idea/scopes/scope_settings.xml
+CauNavi_proto/.idea/vcs.xml
+
 
 # Keystore files
 # Uncomment the following line if you do not want to check your keystore files in.

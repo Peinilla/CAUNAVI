@@ -1,5 +1,7 @@
 package com.example.hh.caunavi_proto;
 
+import android.content.Intent;
+import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -8,10 +10,18 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.google.ar.core.Anchor;
@@ -106,6 +116,10 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
     private Timer timer;
     private TimerTask timerTask;
 
+    private ListView listView;
+
+    private int destinationID;
+
     // Anchors created from taps used for object placing with a given color.
     private static class ColoredAnchor {
         public final Anchor anchor;
@@ -126,6 +140,8 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         surfaceView = findViewById(R.id.preview);
         displayRotationHelper = new DisplayRotationHelper(/*context=*/ this);
 
+        setMenuView();
+
         // Set up tap listener.
         tapHelper = new TapHelper(/*context=*/ this);
         surfaceView.setOnTouchListener(tapHelper);
@@ -140,12 +156,6 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         installRequested = false;
 
         angleText = (TextView)findViewById(R.id.headangle);
-        angleText.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                testClick(view);
-            }
-        });
 
         SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 
@@ -521,83 +531,11 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         }
     }
 
-    public void testClick(View v){
-        int viewId;
-        float[] tMatrix = new float[16];
-        float[] rMatrix = new float[16];
-        float[] tempM = new float[16];
-
-        if (rollAngle < -90 || rollAngle > 90){ // 사용자가 핸드폰을 들고 하늘을 바라볼때
-            if (headingAngle < 0 ) {
-                headingAngle += 180;
-            }
-            else {
-                headingAngle -= 180;
-            }
-            pitchAngle = pitchAngle*(-1) - 90;
-        }
-        else{// 사용자가 핸드폰을 들고 땅을 바라볼때
-            headingAngle += 360;
-            pitchAngle += 90;
-        }
-        // else headingAngle += 360;
-
-        if ((headingAngle < 90 && headingAngle > -90) || headingAngle > 270)
-            pitchAngle *= -1;
-
-
-        Matrix.setIdentityM(tMatrix, 0);
-        Matrix.translateM(tMatrix, 0, 0f, 0.0f, -1.8f);
-
-        if (v.getId() == R.id.headangle)
-            viewId = R.id.ar_4;
-        else
-            viewId = v.getId();
-
-        Matrix.setIdentityM(rMatrix,0);
-        switch (viewId){
-
-            case R.id.ar_1 :
-                //Matrix.translateM(tMatrix, 0, (float)Math.sin(90 - headingAngle), -0.2f, -(float)Math.cos(90 - headingAngle));
-                Matrix.setRotateM(rMatrix,0,headingAngle - 90,0f,1f,0f); // 화살표가 동으로
-                break;
-            case R.id.ar_2 :
-                //Matrix.translateM(tMatrix, 0, (float)Math.sin(270 - headingAngle), -0.2f, -(float)Math.cos(270 - headingAngle));
-                Matrix.setRotateM(rMatrix,0,headingAngle + 90,0f,1f,0f); // 화살표가 서
-                break;
-            case R.id.ar_3 :
-                //Matrix.translateM(tMatrix, 0, (float)Math.sin(180 - headingAngle), -0.2f, -(float)Math.cos(180 - headingAngle));
-                Matrix.setRotateM(rMatrix,0,headingAngle + 180,0f,1f,0f); // 화살표가 남
-                break;
-            case R.id.ar_4 :
-                //Matrix.translateM(tMatrix, 0, (float)Math.sin(360 - headingAngle), -0.2f, -(float)Math.cos(360 - headingAngle));
-                Matrix.setRotateM(rMatrix,0,headingAngle,0f,1f,0f); // 화살표가 북으로
-                Log.i("test","방위 : " + mapManager.getNextBearingTest(gps.lat,gps.lon));
-                break;
-        }
-        Matrix.multiplyMM(tMatrix,0,tMatrix,0,rMatrix,0);
-
-        Matrix.setRotateM(rMatrix, 0, pitchAngle, -1.0f, 0.0f, 0.0f);
-        Matrix.multiplyMM(tMatrix, 0, tMatrix, 0, rMatrix, 0);
-
-        Matrix.setIdentityM(tempM, 0);
-        Matrix.invertM(tempM,0,viewmtx,0);
-        Matrix.multiplyMM(tempM,0,tempM,0,tMatrix, 0);
-
-        testList.add(tempM);
-    }
-
     public void setArrow(float destinationAngle){
         float[] tMatrix = new float[16];
         float[] rMatrix = new float[16];
         float[] tempM = new float[16];
 
-        Matrix.setIdentityM(tMatrix, 0);
-        Matrix.translateM(tMatrix, 0, 0f, -0.2f, -1.2f);
-
-        Matrix.setIdentityM(rMatrix,0);
-        //Matrix.translateM(tMatrix, 0, (float)Math.sin(270 + headingAngle), -0.2f, -(float)Math.cos(270 + headingAngle));
-
         if (rollAngle < -90 || rollAngle > 90){ // 사용자가 핸드폰을 들고 하늘을 바라볼때
             if (headingAngle < 0 ) {
                 headingAngle += 180;
@@ -617,11 +555,16 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
             pitchAngle *= -1;
 
 
+        Matrix.setIdentityM(tMatrix, 0);
+        Matrix.translateM(tMatrix, 0, 0f, 0.2f, -3.0f);
+
+        Matrix.setIdentityM(rMatrix,0);
+        //Matrix.translateM(tMatrix, 0, (float)Math.sin(270 + headingAngle), -0.2f, -(float)Math.cos(270 + headingAngle));
 
         Matrix.setRotateM(rMatrix,0,headingAngle - destinationAngle,0f,1f,0f); // 화살표가 동으로
         Matrix.multiplyMM(tMatrix,0,tMatrix,0,rMatrix,0);
 
-        Matrix.setRotateM(rMatrix, 0, pitchAngle, -1.0f, 0.0f, 0.0f);
+        Matrix.setRotateM(rMatrix, 0, pitchAngle, -2.0f, 0.0f, 0.0f);
         Matrix.multiplyMM(tMatrix, 0, tMatrix, 0, rMatrix, 0);
 
 
@@ -634,6 +577,67 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         }else{
             testList.remove(0);
             testList.add(tempM);
+        }
+    }
+// TODO : 방향 조정 다 끝나면 여기로
+    public void AngleAdjustment() {
+
+    }
+
+    public void drawerOpen(View v){
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.Menu);
+        if(!drawer.isDrawerOpen(Gravity.LEFT)){
+            drawer.openDrawer(Gravity.LEFT) ;
+        }
+
+    }
+// 어뎁터뷰
+    public void setMenuView(){
+        final String[] items = {"길찾기", "menu2", "menu3"};
+        ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, items){
+            @NonNull
+            @Override
+            public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+                View view = super.getView(position, convertView, parent);
+                TextView tv = (TextView) view.findViewById(android.R.id.text1);
+                tv.setTextColor(Color.BLACK);
+                return view;
+            }
+        };
+        listView = (ListView) findViewById(R.id.MenuList);
+        listView.setAdapter(adapter);
+
+        listView.setOnItemClickListener(new ListView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView parent, View v, int position, long id) {
+                switch (position) {
+                    case 0: // menu1
+                        Intent intent = new Intent(getApplicationContext(), NaviPopupActivity.class);
+                        startActivityForResult(intent, 1);
+                        break;
+                    case 1: // menu2
+                        break;
+                    case 2: // menu3
+                        break;
+                }
+
+                DrawerLayout drawer = (DrawerLayout) findViewById(R.id.Menu);
+                drawer.closeDrawer(Gravity.LEFT);
+            }
+        });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(requestCode==1){
+            if(resultCode==RESULT_OK){
+                //데이터 받기
+                destinationID = data.getIntExtra("result",0);
+                if(destinationID != 0){
+
+                    mapManager.setDestination(destinationID,gps.lat,gps.lon);
+                }
+            }
         }
     }
 }

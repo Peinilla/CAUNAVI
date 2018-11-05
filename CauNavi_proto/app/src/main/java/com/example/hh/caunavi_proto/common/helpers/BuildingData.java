@@ -15,5 +15,19 @@ public class BuildingData {
         public BuildingData() {
             FloorImageStr = new ArrayList<>();
         }
+
+        public String getText(){
+                return Text;
+        }
+
+        public String getName() {
+                return Name;
+        }
+
+        public String getImageStr(){
+                return  ImageStr;
+        }
+
+
 }
 

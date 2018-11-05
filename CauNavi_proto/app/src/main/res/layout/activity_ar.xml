@@ -1,92 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:layout_editor_absoluteY="25dp">
 
-    <android.opengl.GLSurfaceView
-        android:id="@+id/preview"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="visible" />
+    <android.support.v4.widget.DrawerLayout
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:id="@+id/Menu">
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <TextView
-            android:id="@+id/gpsText"
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="92dp"
-            android:editable="false"
-            android:ems="10"
-            android:inputType="textPersonName"
-            android:singleLine="false"
-            android:text="gpsText"
-            android:textSize="24sp" />
+            android:layout_height="match_parent">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:gravity="right"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/headangle"
+            <android.opengl.GLSurfaceView
+                android:id="@+id/preview"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="TextView" />
+                android:layout_height="match_parent"
+                android:visibility="visible" />
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal">
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="false"
+                android:gravity="right"
+                android:orientation="vertical">
 
-                <Button
-                    android:id="@+id/ar_1"
+                <ImageView
+                    android:id="@+id/draw_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:onClick="testClick"
-                    android:text="동"
-                    android:visibility="invisible" />
+                    android:layout_gravity="left"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginTop="20dp"
+                    android:alpha="0.5"
+                    android:onClick="drawerOpen"
+                    app:srcCompat="@drawable/draw_button2" />
 
-                <Button
-                    android:id="@+id/ar_2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:onClick="testClick"
-                    android:text="서"
-                    android:visibility="invisible" />
+                <TextView
+                    android:id="@+id/gpsText"
+                    android:layout_width="match_parent"
+                    android:layout_height="92dp"
+                    android:editable="false"
+                    android:ems="10"
+                    android:inputType="textPersonName"
+                    android:singleLine="false"
+                    android:text="gpsText"
+                    android:textSize="24sp" />
 
-                <Button
-                    android:id="@+id/ar_3"
-                    android:layout_width="wrap_content"
+                <TextView
+                    android:id="@+id/headangle"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:onClick="testClick"
-                    android:text="남"
-                    android:visibility="invisible" />
-
-                <Button
-                    android:id="@+id/ar_4"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:onClick="testClick"
-                    android:text="북"
-                    android:visibility="invisible" />
+                    android:text="TextView" />
             </LinearLayout>
 
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="100dp" />
-        </LinearLayout>
+        </RelativeLayout>
 
-    </RelativeLayout>
+        <ListView
+            android:layout_width="200dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="left"
+            android:background="#eeeeee"
+            android:id="@+id/MenuList" />
 
+    </android.support.v4.widget.DrawerLayout>
 
 </android.support.constraint.ConstraintLayout>
