@@ -34,6 +34,8 @@ public class InfoViewActivity extends AppCompatActivity {
     InputStream is;
 
     private BuildingData d;
+    private BuildingDataHelper bdh;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,7 +44,8 @@ public class InfoViewActivity extends AppCompatActivity {
         intent = getIntent();
         tmp = intent.getStringExtra("b_id");
         ID = Integer.parseInt(tmp.substring(0,3));
-        d = (BuildingData)new BuildingDataHelper(this).getBuildingData(ID);
+        bdh = BuildingDataHelper.getInstance(this);
+        d = (BuildingData)bdh.getBuildingData(ID);
 
         name = (TextView)findViewById(R.id.textView);
         content = (TextView)findViewById(R.id.textView2);

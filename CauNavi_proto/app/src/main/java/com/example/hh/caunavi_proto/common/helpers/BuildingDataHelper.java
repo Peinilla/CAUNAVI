@@ -20,6 +20,7 @@ import java.util.ArrayList;
 public class BuildingDataHelper {
     Context mContext;
     ArrayList<BuildingData> buildingData;
+    private static BuildingDataHelper instance;
 
     public BuildingDataHelper(Context context) {
         mContext = context;
@@ -59,5 +60,12 @@ public class BuildingDataHelper {
         }
 
         return  d;
+    }
+
+    public static BuildingDataHelper getInstance(Context context) {
+        if(instance == null){
+            instance = new BuildingDataHelper(context);
+        }
+        return instance;
     }
 }

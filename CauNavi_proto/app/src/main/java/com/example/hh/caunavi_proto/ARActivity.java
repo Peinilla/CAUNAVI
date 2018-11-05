@@ -634,7 +634,6 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
                 //데이터 받기
                 destinationID = data.getIntExtra("result",0);
                 if(destinationID != 0){
-                    Log.i("test",destinationID +" : arAid");
 
                     mapManager.setDestination(destinationID,gps.lat,gps.lon);
                 }
