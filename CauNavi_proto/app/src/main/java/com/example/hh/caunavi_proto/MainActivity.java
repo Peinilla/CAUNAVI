@@ -26,6 +26,8 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
                 break;
             case R.id.button4 :
+                Intent intent2 = new Intent(getApplicationContext(), NaviPopupActivity.class);
+                startActivity(intent2);
                 break;
             case R.id.button5 :
                 startActivity(new Intent(MainActivity.this,InfoActivity.class));

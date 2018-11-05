@@ -93,6 +93,11 @@ public class MapManager {
         route.add(11);
         route.add(12);
         //
+        if(mToast != null) {
+            mToast.cancel();
+        }
+        mToast = Toast.makeText(mContext.getApplicationContext(),destinationID +"관까지 안내를 시작합니다.", Toast.LENGTH_SHORT);
+        mToast.show();
     }
 
     public void setNearPointID(double lat, double lon){

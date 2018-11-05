@@ -1,6 +1,7 @@
 package com.example.hh.caunavi_proto;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -9,12 +10,15 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -113,6 +117,8 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
     private TimerTask timerTask;
 
     private ListView listView;
+
+    private int destinationID;
 
     // Anchors created from taps used for object placing with a given color.
     private static class ColoredAnchor {
@@ -574,13 +580,30 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         }
     }
 // TODO : 방향 조정 다 끝나면 여기로
-    public void AngleAdjustment(){
+    public void AngleAdjustment() {
+
+    }
+
+    public void drawerOpen(View v){
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.Menu);
+        if(!drawer.isDrawerOpen(Gravity.LEFT)){
+            drawer.openDrawer(Gravity.LEFT) ;
+        }
 
     }
 // 어뎁터뷰
     public void setMenuView(){
         final String[] items = {"길찾기", "menu2", "menu3"};
-        ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, items);
+        ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, items){
+            @NonNull
+            @Override
+            public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+                View view = super.getView(position, convertView, parent);
+                TextView tv = (TextView) view.findViewById(android.R.id.text1);
+                tv.setTextColor(Color.BLACK);
+                return view;
+            }
+        };
         listView = (ListView) findViewById(R.id.MenuList);
         listView.setAdapter(adapter);
 
@@ -603,12 +626,18 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
             }
         });
     }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(requestCode==1){
             if(resultCode==RESULT_OK){
                 //데이터 받기
-                String result = data.getStringExtra("result");
+                destinationID = data.getIntExtra("result",0);
+                if(destinationID != 0){
+                    Log.i("test",destinationID +" : arAid");
+
+                    mapManager.setDestination(destinationID,gps.lat,gps.lon);
+                }
             }
         }
     }

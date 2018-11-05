@@ -46,10 +46,7 @@ public class BuildingDataHelper {
             reader.close();
             is.close();
         } catch (Exception e) {
-            Log.i("test", e.getMessage());
         }
-
-        Log.i("test", buildingData.get(20).Text);
     }
 
     public BuildingData getBuildingData(int id){
