@@ -12,11 +12,13 @@ import android.widget.Button;
 public class NaviPopupActivity extends Activity {
 
     private int building_ID;
+    private Button b;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_info);
+
     }
 
     public void sendResult(){
