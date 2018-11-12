@@ -1,9 +1,11 @@
 package com.example.hh.caunavi_proto;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.AssetManager;
 import android.location.Location;
 import android.util.Log;
+import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import com.example.hh.caunavi_proto.common.helpers.SnackbarHelper;
@@ -25,11 +27,14 @@ public class MapManager {
     private int nearPointID;
     private int nextPointID;
     private int prevPointID;
+    private int[][] map;
+    private int length;
 
     private static Toast mToast;
 
     public class mapData {
         Location location = new Location("map");
+        int index;
         int id;
         String name;
     }
@@ -41,7 +46,7 @@ public class MapManager {
         Toast mToast = new Toast(mContext.getApplicationContext());
 
         try{
-            is = am.open("map/backGate_to_CentralLibrary.txt");
+            is = am.open("map/new_map3.txt");
             BufferedReader bufrd = new BufferedReader(new InputStreamReader(is,"UTF-8"));
 
             String line = bufrd.readLine();
@@ -49,18 +54,43 @@ public class MapManager {
                 String str[] = line.split("\t");
 
                 mapData md = new mapData();
-                md.location.setLatitude(Double.valueOf(str[0]));
-                md.location.setLongitude(Double.valueOf(str[1]));
-                md.id = Integer.valueOf(str[2]);
-                md.name = str[3];
+                md.index = Integer.valueOf(str[0]);
+                md.location.setLatitude(Double.valueOf(str[1]));
+                md.location.setLongitude(Double.valueOf(str[2]));
+                md.id = Integer.valueOf(str[3]);
+                md.name = str[4];
                 mapDataArrayList.add(md);
+            }
+            bufrd.close();
+
+            is = am.open("map/new_graph.txt");
+            bufrd = new BufferedReader(new InputStreamReader(is,"UTF-8"));
+
+            line = bufrd.readLine();
+            line = bufrd.readLine();
+            String str[] = line.split("\t");
+            length = str.length;
+            map = new int[length][length];
+            for(int inx = 0; inx < length; inx ++){
+                map[0][inx] = Integer.parseInt(str[inx]);
+            }
+            for(int inx = 1; inx < length; inx ++){
+                line = bufrd.readLine();
+                String str2[] = line.split("\t");
+                for(int jnx = 0; jnx < length; jnx++){
+                    map[inx][jnx] = Integer.parseInt(str2[jnx]);
+                }
             }
 
             bufrd.close();
-            is.close();
+
         }catch (Exception e){
             Log.i("test", e.getMessage());
         }
+
+        getRoute(41,0);
+
+
         init();
     }
     public void init() {
@@ -198,6 +228,62 @@ public class MapManager {
             }
         }
         return nearPointID;
+    }
+
+    public ArrayList<Integer> getRoute(int start, int end) {
+
+        ArrayList<Integer> route = new ArrayList<>();
+
+        int dist[] = new int[length];
+        boolean visit[] = new boolean[length];
+        int inf = Integer.MAX_VALUE;
+        int prev[] = new int[length];
+        int stack[] = new int[length];
+
+        for(int inx = 0; inx <length; inx++){
+            dist[inx] = inf;
+            prev[inx] = 0;
+            visit[inx] = false;
+        }
+
+        dist[start] = 0;
+
+        for(int inx = 0; inx < length; inx ++){
+            int min = inf;
+            int tmp = 0;
+            for(int jnx = 0; jnx < length; jnx ++){
+                if(!visit[jnx] && min > dist[jnx]){
+                    min = dist[jnx];
+                    tmp = jnx;
+                }
+            }
+            visit[tmp] = true;
+
+            for(int jnx = 0; jnx < length; jnx++){
+                if(map[tmp][jnx] != 0 && dist[jnx] > dist[tmp] + map[tmp][jnx]){
+                    dist[jnx] = dist[tmp] + map[tmp][jnx];
+                    prev[jnx] = tmp;
+                }
+            }
+        }
+        int jnx = 0;
+        int inx = end;
+
+        while(true){
+            stack[jnx++] = inx;
+            if(inx == start){
+                break;
+            }
+            inx = prev[inx];
+        }
+
+        for(int mnx = jnx-1;mnx > -1; mnx--){
+            route.add(stack[mnx]);
+        }
+
+        Log.i("test",route.toString());
+
+        return route;
     }
 }
 
