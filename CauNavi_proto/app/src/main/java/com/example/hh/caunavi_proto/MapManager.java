@@ -126,7 +126,7 @@ public class MapManager {
         if(mToast != null) {
             mToast.cancel();
         }
-        mToast = Toast.makeText(mContext.getApplicationContext(),destinationID +"관까지 안내를 시작합니다.", Toast.LENGTH_SHORT);
+        mToast = Toast.makeText(mContext.getApplicationContext(),destinationID +"관까지 안내를 시작합니다.", Toast.LENGTH_LONG);
         mToast.show();
     }
 
@@ -170,7 +170,7 @@ public class MapManager {
                     mToast.cancel();
                 }
                 mToast = Toast.makeText(mContext.getApplicationContext(),nameNext + "/" + distNext + "m"  , Toast.LENGTH_SHORT);
-                mToast.show();
+                //mToast.show();
                 return bearing;
             }
         }else{
@@ -201,7 +201,7 @@ public class MapManager {
                     mToast.cancel();
                 }
                 mToast = Toast.makeText(mContext.getApplicationContext(),nameNext + "\n" + distNext + "m"  , Toast.LENGTH_SHORT);
-                mToast.show();
+                //mToast.show();
                 return bearing;
             }else{
                 String namePrev = mapDataArrayList.get(prevPointID).name;
@@ -211,7 +211,7 @@ public class MapManager {
                     mToast.cancel();
                 }
                 mToast = Toast.makeText(mContext.getApplicationContext(),namePrev + "->" + nameNext + "\n" + distNext + "m"  , Toast.LENGTH_SHORT);
-                mToast.show();
+                //mToast.show();
                 return bearing;
             }
         }else{

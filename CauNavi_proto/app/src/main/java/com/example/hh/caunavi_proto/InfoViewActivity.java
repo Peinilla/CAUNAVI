@@ -7,6 +7,8 @@ import android.graphics.BitmapFactory;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -35,11 +37,13 @@ public class InfoViewActivity extends AppCompatActivity {
 
     private BuildingData d;
     private BuildingDataHelper bdh;
+    private Button startGuideButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_info_view);
+
 
         intent = getIntent();
         tmp = intent.getStringExtra("b_id");
@@ -68,5 +72,19 @@ public class InfoViewActivity extends AppCompatActivity {
         }catch (Exception e){
             Log.i("test",e.getMessage());
         }
+
+        startGuideButton = (Button)findViewById(R.id.startGuideButton);
+        startGuideButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startGuide(view);
+            }
+        });
+    }
+
+    public void startGuide(View v){
+        Intent i = new Intent(this,ARActivity.class);
+        i.putExtra("Build_id",ID);
+        startActivity(i);
     }
 }

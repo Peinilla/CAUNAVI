@@ -119,6 +119,7 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
     private ListView listView;
 
     private int destinationID;
+    private boolean isDestinationSet;
 
     // Anchors created from taps used for object placing with a given color.
     private static class ColoredAnchor {
@@ -141,6 +142,12 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         displayRotationHelper = new DisplayRotationHelper(/*context=*/ this);
 
         setMenuView();
+        isDestinationSet = false;
+
+        Intent i = new Intent();
+        i = getIntent();
+        destinationID = i.getIntExtra("Build_id",0);
+        Log.i("destinationID", Integer.toString(destinationID));
 
         // Set up tap listener.
         tapHelper = new TapHelper(/*context=*/ this);
@@ -185,7 +192,7 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
                     rollAngle = (float) Math.toDegrees(values[2]);
 
 
-                    angleText.setText((String.valueOf(headingAngle)));
+                    //angleText.setText((String.valueOf(headingAngle)));
                 }
             }
 
@@ -208,7 +215,7 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         gps = new GpsManager(this,(TextView)findViewById(R.id.gpsText));
 
         mapManager = new MapManager(this);
-
+      
         timerTask = new TimerTask() {
             @Override
             public void run() {
@@ -216,6 +223,10 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
                     @Override
                     public void run() {
                         if(gps.isGetLocation) {
+                            if(!isDestinationSet){
+                                    setDest();
+                                isDestinationSet = true;
+                            }
                             setArrow(mapManager.getNextBearingTest(gps.lat, gps.lon));
                         }
                     }
@@ -225,6 +236,7 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
 
         timer = new Timer();
         timer.schedule(timerTask,5000,3000);
+
     }
 
     @Override
@@ -549,9 +561,6 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         }
         // else headingAngle += 360;
 
-        if ((headingAngle < 90 && headingAngle > -90) || headingAngle > 270)
-            pitchAngle *= -1;
-
 
         Matrix.setIdentityM(tMatrix, 0);
         Matrix.translateM(tMatrix, 0, 0f, 0.2f, -3.0f);
@@ -562,7 +571,7 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         Matrix.setRotateM(rMatrix,0,headingAngle - destinationAngle,0f,1f,0f); // 화살표가 동으로
         Matrix.multiplyMM(tMatrix,0,tMatrix,0,rMatrix,0);
 
-        Matrix.setRotateM(rMatrix, 0, pitchAngle, -2.0f, 0.0f, 0.0f);
+        Matrix.setRotateM(rMatrix, 0, pitchAngle, -1.0f, 0.0f,  0.0f);
         Matrix.multiplyMM(tMatrix, 0, tMatrix, 0, rMatrix, 0);
 
 
@@ -632,10 +641,17 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
                 //데이터 받기
                 destinationID = data.getIntExtra("result",0);
                 if(destinationID != 0){
-
-                    mapManager.setDestination(destinationID,gps.lat,gps.lon);
+                    setDest();
+                    isDestinationSet = true;
                 }
             }
         }
+    }
+
+    public void setDest(){
+        mapManager.setDestination(destinationID,gps.lat,gps.lon);
+        Log.i("dest",destinationID +"  asdf");
+        Toast.makeText(this, ""+destinationID+"관으로", Toast.LENGTH_SHORT).show();
+        angleText.setText(""+destinationID+"관");
     }
 }
