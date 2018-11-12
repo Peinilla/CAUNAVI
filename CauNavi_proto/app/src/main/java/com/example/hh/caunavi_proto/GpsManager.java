@@ -84,7 +84,6 @@ public class GpsManager extends Service implements LocationListener {
                         location = locationManager
                                 .getLastKnownLocation(LocationManager.GPS_PROVIDER);
                         if (location != null) {
-                            this.isGetLocation = true;
                             lat = location.getLatitude();
                             lon = location.getLongitude();
                         }
@@ -104,6 +103,8 @@ public class GpsManager extends Service implements LocationListener {
     }
 
     public void onLocationChanged(Location location) {
+
+        this.isGetLocation = true;
         lat = location.getLatitude();
         lon = location.getLongitude();
 

@@ -208,9 +208,7 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         gps = new GpsManager(this,(TextView)findViewById(R.id.gpsText));
 
         mapManager = new MapManager(this);
-        ///
-        mapManager.setDestination(0,gps.lat,gps.lon); // 테스트용
-        ///
+
         timerTask = new TimerTask() {
             @Override
             public void run() {
