@@ -19,6 +19,8 @@ import android.support.v4.content.ContextCompat;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.w3c.dom.Text;
+
 public class GpsManager extends Service implements LocationListener {
 
     private final Context mContext;
@@ -40,6 +42,8 @@ public class GpsManager extends Service implements LocationListener {
     private static final long MIN_TIME_BW_UPDATES = 1000;
 
     protected LocationManager locationManager;
+
+    TextView t;
 
     public GpsManager(Context context) {
         this.mContext = context;
@@ -101,9 +105,13 @@ public class GpsManager extends Service implements LocationListener {
 
     public void onLocationChanged(Location location) {
 
-        this.isGetLocation = true;
-        lat = location.getLatitude();
-        lon = location.getLongitude();
+        if(location.getAccuracy() < 20){
+            this.isGetLocation = true;
+            lat = location.getLatitude();
+            lon = location.getLongitude();
+        }else{
+            this.isGetLocation = false;
+        }
 
     }
 

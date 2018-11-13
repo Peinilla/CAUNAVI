@@ -30,6 +30,7 @@ public class MapManager {
     private int[][] map;
     private int length;
 
+    private boolean isDestination;
     private static Toast mToast;
 
     public class mapData {
@@ -94,16 +95,16 @@ public class MapManager {
         nearPointID = 0;
         nextPointID = 0;
         prevPointID = 0;
+        isDestination = false;
     }
 
     public void setDestination(int destination, double lat, double lon){
-        init();
         setNearPointID(lat,lon);
         this.destinationID = getDestinationID(destination);
         nextPointID = nearPointID;
         prevPointID = nearPointID;
 
-        route.clear();
+        route = new ArrayList<>();
         route = getRoute(nearPointID,destinationID);
         if(mToast != null) {
             mToast.cancel();
@@ -113,6 +114,23 @@ public class MapManager {
         Log.i("test", "near : " + nearPointID + "/lat : " + lat);
 
         Log.i("test", route.toString());
+
+        isDestination = true;
+    }
+    public void reSearchDest(){
+        nextPointID = nearPointID;
+        prevPointID = nearPointID;
+
+        route = new ArrayList<>();
+        route = getRoute(nearPointID,destinationID);
+
+        if(mToast != null) {
+            mToast.cancel();
+        }
+        mToast = Toast.makeText(mContext.getApplicationContext(),"경로 재탐색중", Toast.LENGTH_LONG);
+        mToast.show();
+
+        isDestination = true;
     }
 
     public void setNearPointID(double lat, double lon){
@@ -174,11 +192,13 @@ public class MapManager {
         tempLoc.setLongitude(lon);
 
         int distNext = (int) tempLoc.distanceTo(mapDataArrayList.get(nextPointID).location);
-        if(distNext > 8){
+        if(distNext > 12){
             if(nextPointID != nearPointID && prevPointID != nearPointID){
-                setDestination(destinationID,lat,lon); // 경로 재설정
+                // 경로재탐색
+                reSearchDest();
                 return getNextBearingTest(lat,lon);
             } else if(prevPointID == nextPointID){
+                // 첫번째 포인트
                 String namePrev = mapDataArrayList.get(prevPointID).name;
                 String nameNext = mapDataArrayList.get(nextPointID).name;
                 float bearing = tempLoc.bearingTo(mapDataArrayList.get(nextPointID).location);
@@ -186,7 +206,7 @@ public class MapManager {
                     mToast.cancel();
                 }
                 mToast = Toast.makeText(mContext.getApplicationContext(),nameNext + "\n" + distNext + "m"  , Toast.LENGTH_SHORT);
-                //mToast.show();
+                mToast.show();
                 return bearing;
             }else{
                 String namePrev = mapDataArrayList.get(prevPointID).name;
@@ -196,7 +216,7 @@ public class MapManager {
                     mToast.cancel();
                 }
                 mToast = Toast.makeText(mContext.getApplicationContext(),namePrev + "->" + nameNext + "\n" + distNext + "m"  , Toast.LENGTH_SHORT);
-                //mToast.show();
+                mToast.show();
                 return bearing;
             }
         }else{
@@ -209,6 +229,7 @@ public class MapManager {
     public int getnextPoint(){
         for(int inx = 0; inx < route.size(); inx ++){
             if(route.get(inx) == nearPointID){
+                Log.i("test",nextPointID + " next");
                 return route.get(inx + 1);
             }
         }
@@ -295,6 +316,14 @@ public class MapManager {
 
     public String getNearPoint(){
         return mapDataArrayList.get(nearPointID).name;
+    }
+
+    public boolean isArrivalDest(){
+        if(!isDestination){
+            return false;
+        }else {
+            return (nearPointID == destinationID);
+        }
     }
 }
 
