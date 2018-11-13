@@ -1,5 +1,6 @@
 package com.example.hh.caunavi_proto;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
@@ -58,6 +59,7 @@ import com.google.ar.core.exceptions.UnavailableSdkTooOldException;
 import com.google.ar.core.exceptions.UnavailableUserDeclinedInstallationException;
 
 import java.io.IOException;
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -77,6 +79,7 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
     private GLSurfaceView surfaceView;
     private GpsManager gps;
     private MapManager mapManager;
+    private Context mContext;
     // 지도 경로
 
     private boolean installRequested;
@@ -143,6 +146,7 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         setContentView(R.layout.activity_ar);
         surfaceView = findViewById(R.id.preview);
         displayRotationHelper = new DisplayRotationHelper(/*context=*/ this);
+        mContext = this;
 
         setMenuView();
         isDestinationSet = false;
@@ -675,15 +679,26 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
     }
 
     public void end(){
+        onPause();
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("목적지에 도착했습니다");
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+        builder.setTitle("목적지에 도착했습니다.");
+        builder.setMessage("목적지의 정보를 보시겠습니까?");
+        builder.setPositiveButton("아니오", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 finish();
             }
         });
-        builder.show();
+        builder.setNegativeButton("예", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                Intent intent = new Intent(getApplicationContext(), InfoViewActivity.class);
+                intent.putExtra("b_id",destinationID+"");
+
+                startActivity(intent);
+                finish();
+            }
+        });        builder.show();
     }
 
     @Override

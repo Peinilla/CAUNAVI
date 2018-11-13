@@ -105,7 +105,7 @@ public class GpsManager extends Service implements LocationListener {
 
     public void onLocationChanged(Location location) {
 
-        if(location.getAccuracy() < 20){
+        if(true){
             this.isGetLocation = true;
             lat = location.getLatitude();
             lon = location.getLongitude();

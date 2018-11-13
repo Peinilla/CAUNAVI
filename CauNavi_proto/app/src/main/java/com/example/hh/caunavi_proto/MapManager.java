@@ -131,6 +131,10 @@ public class MapManager {
         mToast.show();
 
         isDestination = true;
+
+        Log.i("test", "near : " + nearPointID);
+
+        Log.i("test", route.toString());
     }
 
     public void setNearPointID(double lat, double lon){
@@ -221,19 +225,25 @@ public class MapManager {
             }
         }else{
             prevPointID = nextPointID;
-            nextPointID = getnextPoint();
-            return getNextBearingTest(lat,lon);
+            if(nextPointID != getnextPoint()){
+                nextPointID = getnextPoint();
+                return getNextBearingTest(lat,lon);
+            }
+            else{
+                float bearing = mapDataArrayList.get(prevPointID).location.bearingTo(mapDataArrayList.get(nextPointID).location);
+                return bearing;
+            }
         }
     }
 
     public int getnextPoint(){
-        for(int inx = 0; inx < route.size(); inx ++){
-            if(route.get(inx) == nearPointID){
-                Log.i("test",nextPointID + " next");
-                return route.get(inx + 1);
-            }
+        int index = route.indexOf(nearPointID);
+        Log.i("test",index + "getNext Index");
+        if(index + 1 != route.size()){
+            return route.get(index+1);
+        }else{
+            return route.get(index);
         }
-        return nearPointID;
     }
 
     public int getDestinationID(int destination){
