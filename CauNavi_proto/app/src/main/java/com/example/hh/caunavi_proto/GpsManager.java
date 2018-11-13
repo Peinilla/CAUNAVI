@@ -23,8 +23,6 @@ public class GpsManager extends Service implements LocationListener {
 
     private final Context mContext;
 
-    private TextView gpsText;
-
     // 현재 GPS 사용유무
     boolean isGPSEnabled = false;
 
@@ -43,10 +41,9 @@ public class GpsManager extends Service implements LocationListener {
 
     protected LocationManager locationManager;
 
-    public GpsManager(Context context, TextView t) {
+    public GpsManager(Context context) {
         this.mContext = context;
         getLocation();
-        gpsText = t;
     }
 
 
@@ -108,8 +105,6 @@ public class GpsManager extends Service implements LocationListener {
         lat = location.getLatitude();
         lon = location.getLongitude();
 
-        String str = String.format("%.6f , %.6f /// %d",lat,lon,(int)location.getAccuracy());
-        gpsText.setText(str);
     }
 
     public void onStatusChanged(String provider, int status, Bundle extras) {

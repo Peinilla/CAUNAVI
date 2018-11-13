@@ -112,6 +112,7 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
     private float modelAngle;
 
     private TextView angleText;
+    private TextView destView;
 
     private Timer timer;
     private TimerTask timerTask;
@@ -163,6 +164,7 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         installRequested = false;
 
         angleText = (TextView)findViewById(R.id.headangle);
+        destView = (TextView)findViewById(R.id.gpsText);
 
         SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 
@@ -212,7 +214,7 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
                 sensorManager.SENSOR_DELAY_UI);
 
 
-        gps = new GpsManager(this,(TextView)findViewById(R.id.gpsText));
+        gps = new GpsManager(this);
 
         mapManager = new MapManager(this);
       
@@ -650,8 +652,9 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
 
     public void setDest(){
         mapManager.setDestination(destinationID,gps.lat,gps.lon);
-        Log.i("dest",destinationID +"  asdf");
         Toast.makeText(this, ""+destinationID+"관으로", Toast.LENGTH_SHORT).show();
-        angleText.setText(""+destinationID+"관");
+        angleText.setText("현재위치 : " + mapManager.getNearPoint());
+        destView.setText("목적지 : " + destinationID+"관");
+        testList.clear();
     }
 }
