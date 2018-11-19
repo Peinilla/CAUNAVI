@@ -1,9 +1,11 @@
 package com.example.hh.caunavi_proto;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.AssetManager;
 import android.location.Location;
 import android.util.Log;
+import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import com.example.hh.caunavi_proto.common.helpers.SnackbarHelper;
@@ -25,11 +27,15 @@ public class MapManager {
     private int nearPointID;
     private int nextPointID;
     private int prevPointID;
+    private int[][] map;
+    private int length;
 
+    private boolean isDestination;
     private static Toast mToast;
 
     public class mapData {
         Location location = new Location("map");
+        int index;
         int id;
         String name;
     }
@@ -41,7 +47,7 @@ public class MapManager {
         Toast mToast = new Toast(mContext.getApplicationContext());
 
         try{
-            is = am.open("map/backGate_to_CentralLibrary.txt");
+            is = am.open("map/new_map3.txt");
             BufferedReader bufrd = new BufferedReader(new InputStreamReader(is,"UTF-8"));
 
             String line = bufrd.readLine();
@@ -49,55 +55,86 @@ public class MapManager {
                 String str[] = line.split("\t");
 
                 mapData md = new mapData();
-                md.location.setLatitude(Double.valueOf(str[0]));
-                md.location.setLongitude(Double.valueOf(str[1]));
-                md.id = Integer.valueOf(str[2]);
-                md.name = str[3];
+                md.index = Integer.valueOf(str[0]);
+                md.location.setLatitude(Double.valueOf(str[1]));
+                md.location.setLongitude(Double.valueOf(str[2]));
+                md.id = Integer.valueOf(str[3]);
+                md.name = str[4];
                 mapDataArrayList.add(md);
+            }
+            bufrd.close();
+
+            is = am.open("map/new_graph.txt");
+            bufrd = new BufferedReader(new InputStreamReader(is,"UTF-8"));
+
+            line = bufrd.readLine();
+            line = bufrd.readLine();
+            String str[] = line.split("\t");
+            length = str.length;
+            map = new int[length][length];
+            for(int inx = 0; inx < length; inx ++){
+                map[0][inx] = Integer.parseInt(str[inx]);
+            }
+            for(int inx = 1; inx < length; inx ++){
+                line = bufrd.readLine();
+                String str2[] = line.split("\t");
+                for(int jnx = 0; jnx < length; jnx++){
+                    map[inx][jnx] = Integer.parseInt(str2[jnx]);
+                }
             }
 
             bufrd.close();
-            is.close();
+
         }catch (Exception e){
             Log.i("test", e.getMessage());
         }
         init();
     }
     public void init() {
-        destinationID = -1;
-        nearPointID = -1;
-        nextPointID = -1;
-        prevPointID = -1;
+        destinationID = 0;
+        nearPointID = 0;
+        nextPointID = 0;
+        prevPointID = 0;
+        isDestination = false;
     }
 
-    public void setDestination(int destinationID, double lat, double lon){
-        init();
-        this.destinationID = destinationID;
+    public void setDestination(int destination, double lat, double lon){
         setNearPointID(lat,lon);
+        this.destinationID = getDestinationID(destination);
         nextPointID = nearPointID;
         prevPointID = nearPointID;
 
-        // 테스트용
-        this.destinationID = 12;
-        route.add(0);
-        route.add(1);
-        route.add(2);
-        route.add(3);
-        route.add(4);
-        route.add(5);
-        route.add(6);
-        route.add(7);
-        route.add(8);
-        route.add(9);
-        route.add(10);
-        route.add(11);
-        route.add(12);
-        //
+        route = new ArrayList<>();
+        route = getRoute(nearPointID,destinationID);
         if(mToast != null) {
             mToast.cancel();
         }
-        mToast = Toast.makeText(mContext.getApplicationContext(),destinationID +"관까지 안내를 시작합니다.", Toast.LENGTH_LONG);
+        mToast = Toast.makeText(mContext.getApplicationContext(),destination +"관까지 안내를 시작합니다.", Toast.LENGTH_LONG);
         mToast.show();
+        Log.i("test", "near : " + nearPointID + "/lat : " + lat);
+
+        Log.i("test", route.toString());
+
+        isDestination = true;
+    }
+    public void reSearchDest(){
+        nextPointID = nearPointID;
+        prevPointID = nearPointID;
+
+        route = new ArrayList<>();
+        route = getRoute(nearPointID,destinationID);
+
+        if(mToast != null) {
+            mToast.cancel();
+        }
+        mToast = Toast.makeText(mContext.getApplicationContext(),"경로 재탐색중", Toast.LENGTH_LONG);
+        mToast.show();
+
+        isDestination = true;
+
+        Log.i("test", "near : " + nearPointID);
+
+        Log.i("test", route.toString());
     }
 
     public void setNearPointID(double lat, double lon){
@@ -112,7 +149,7 @@ public class MapManager {
             int tempDis = (int)mapDataArrayList.get(inx).location.distanceTo(tempLoc);
             if(distance > tempDis){
                 distance = tempDis;
-                nearID = mapDataArrayList.get(inx).id;
+                nearID = mapDataArrayList.get(inx).index;
             }
         }
         if(nearID != -1){
@@ -159,11 +196,13 @@ public class MapManager {
         tempLoc.setLongitude(lon);
 
         int distNext = (int) tempLoc.distanceTo(mapDataArrayList.get(nextPointID).location);
-        if(distNext > 8){
+        if(distNext > 12){
             if(nextPointID != nearPointID && prevPointID != nearPointID){
-                setDestination(destinationID,lat,lon); // 경로 재설정
+                // 경로재탐색
+                reSearchDest();
                 return getNextBearingTest(lat,lon);
             } else if(prevPointID == nextPointID){
+                // 첫번째 포인트
                 String namePrev = mapDataArrayList.get(prevPointID).name;
                 String nameNext = mapDataArrayList.get(nextPointID).name;
                 float bearing = tempLoc.bearingTo(mapDataArrayList.get(nextPointID).location);
@@ -171,7 +210,7 @@ public class MapManager {
                     mToast.cancel();
                 }
                 mToast = Toast.makeText(mContext.getApplicationContext(),nameNext + "\n" + distNext + "m"  , Toast.LENGTH_SHORT);
-                //mToast.show();
+                mToast.show();
                 return bearing;
             }else{
                 String namePrev = mapDataArrayList.get(prevPointID).name;
@@ -181,23 +220,120 @@ public class MapManager {
                     mToast.cancel();
                 }
                 mToast = Toast.makeText(mContext.getApplicationContext(),namePrev + "->" + nameNext + "\n" + distNext + "m"  , Toast.LENGTH_SHORT);
-                //mToast.show();
+                mToast.show();
                 return bearing;
             }
         }else{
             prevPointID = nextPointID;
-            nextPointID = getnextPoint();
-            return getNextBearingTest(lat,lon);
+            if(nextPointID != getnextPoint()){
+                nextPointID = getnextPoint();
+                return getNextBearingTest(lat,lon);
+            }
+            else{
+                float bearing = mapDataArrayList.get(prevPointID).location.bearingTo(mapDataArrayList.get(nextPointID).location);
+                return bearing;
+            }
         }
     }
 
     public int getnextPoint(){
-        for(int inx = 0; inx < route.size(); inx ++){
-            if(route.get(inx) == nearPointID){
-                return route.get(inx + 1);
+        int index = route.indexOf(nearPointID);
+        Log.i("test",index + "getNext Index");
+        if(index + 1 != route.size()){
+            return route.get(index+1);
+        }else{
+            return route.get(index);
+        }
+    }
+
+    public int getDestinationID(int destination){
+        try {
+            ArrayList<Integer> candidate = new ArrayList<>();
+
+            for (int inx = 0; inx < mapDataArrayList.size(); inx++) {
+                if (mapDataArrayList.get(inx).id == destination) {
+                    candidate.add(mapDataArrayList.get(inx).index);
+                }
+            }
+            int resultID = candidate.get(0);
+            int min = getRoute(nearPointID, candidate.get(0)).size();
+            for (int inx = 0; inx < candidate.size(); inx++) {
+                if (getRoute(nearPointID, candidate.get(inx)).size() < min) {
+                    min = getRoute(nearPointID, candidate.get(inx)).size();
+                    resultID = candidate.get(inx);
+                }
+            }
+            return resultID;
+        }catch (Exception e){
+            Log.i("test",e.getMessage());
+        }
+        return 0;
+    }
+
+    public ArrayList<Integer> getRoute(int start, int end) {
+
+        ArrayList<Integer> route = new ArrayList<>();
+
+        int dist[] = new int[length];
+        boolean visit[] = new boolean[length];
+        int inf = Integer.MAX_VALUE;
+        int prev[] = new int[length];
+        int stack[] = new int[length];
+
+        for(int inx = 0; inx <length; inx++){
+            dist[inx] = inf;
+            prev[inx] = 0;
+            visit[inx] = false;
+        }
+
+        dist[start] = 0;
+
+        for(int inx = 0; inx < length; inx ++){
+            int min = inf;
+            int tmp = 0;
+            for(int jnx = 0; jnx < length; jnx ++){
+                if(!visit[jnx] && min > dist[jnx]){
+                    min = dist[jnx];
+                    tmp = jnx;
+                }
+            }
+            visit[tmp] = true;
+
+            for(int jnx = 0; jnx < length; jnx++){
+                if(map[tmp][jnx] != 0 && dist[jnx] > dist[tmp] + map[tmp][jnx]){
+                    dist[jnx] = dist[tmp] + map[tmp][jnx];
+                    prev[jnx] = tmp;
+                }
             }
         }
-        return nearPointID;
+        int jnx = 0;
+        int inx = end;
+
+        while(true){
+            stack[jnx++] = inx;
+            if(inx == start){
+                break;
+            }
+            inx = prev[inx];
+        }
+
+        for(int mnx = jnx-1;mnx > -1; mnx--){
+            route.add(stack[mnx]);
+        }
+
+        return route;
+    }
+
+    public String getNearPoint(){
+        return mapDataArrayList.get(nearPointID).name;
+    }
+
+    public boolean isArrivalDest(){
+        if(!isDestination){
+            return false;
+        }else {
+            return (nearPointID == destinationID);
+        }
     }
 }
 
