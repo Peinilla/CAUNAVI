@@ -1,15 +1,10 @@
 package com.example.hh.caunavi_proto;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.AssetManager;
 import android.location.Location;
 import android.util.Log;
-import android.widget.ArrayAdapter;
 import android.widget.Toast;
-
-import com.example.hh.caunavi_proto.common.helpers.SnackbarHelper;
-
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -20,8 +15,6 @@ public class MapManager {
     private Context mContext;
     private ArrayList<mapData> mapDataArrayList = new ArrayList<>();
     private ArrayList<Integer> route = new ArrayList<>();
-
-    private final SnackbarHelper messageSnackbarHelper = new SnackbarHelper();
 
     private int destinationID;
     private int nearPointID;

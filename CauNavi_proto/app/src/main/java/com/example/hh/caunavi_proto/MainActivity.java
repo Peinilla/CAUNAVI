@@ -20,15 +20,13 @@ public class MainActivity extends AppCompatActivity {
 
         switch (v.getId()){
             case R.id.button3 :
-                Intent intent=new Intent(MainActivity.this,ARActivity.class);
-                startActivity(intent);
+                startActivity(new Intent(this, NaviPopupActivity.class).putExtra("Mode",1));
                 break;
             case R.id.button4 :
-                Intent intent2 = new Intent(getApplicationContext(), NaviPopupActivity.class);
-                startActivity(intent2);
+                startActivity(new Intent(this, NaviPopupActivity.class));
                 break;
             case R.id.button5 :
-                startActivity(new Intent(MainActivity.this,InfoActivity.class));
+                startActivity(new Intent(this,InfoActivity.class));
                 break;
         }
     }
