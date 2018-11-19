@@ -17,12 +17,11 @@ public class NaviPopupActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_popup);
+        setContentView(R.layout.activity_info);
 
     }
 
     public void sendResult(){
-
         Intent intent = new Intent();
         intent.putExtra("result", building_ID);
         setResult(RESULT_OK, intent);

@@ -4,12 +4,10 @@ import android.content.Intent;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewParent;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -32,11 +30,10 @@ public class InfoViewActivity extends AppCompatActivity {
     private int ID;
     private TextView name;
     private TextView content;
+    private ImageView imgV;
 
-    private int[] images = new int[3];
-    private int[] images2 = new int[2];
-    private ViewPager viewPager;
-    private Adapter adapter;
+    AssetManager am;
+    InputStream is;
 
     private BuildingData d;
     private BuildingDataHelper bdh;
@@ -56,31 +53,25 @@ public class InfoViewActivity extends AppCompatActivity {
 
         name = (TextView)findViewById(R.id.textView);
         content = (TextView)findViewById(R.id.textView2);
+        imgV = (ImageView)findViewById(R.id.imageView);
 
         name.setText(""+ ID +"관\n"+d.getName());
         content.setText(d.getText());
 
-        if(ID==209 || ID==304 || ID==309) {
-            for (int i = 1; i <= 2; i++) {
-                images2[i - 1] = getApplicationContext().getResources().getIdentifier("c_" + ID + "_" + i, "drawable", "com.example.hh.caunavi_proto");
-                viewPager = (ViewPager) findViewById(R.id.view);
-                adapter = new Adapter(this, images2);
-                viewPager.setAdapter(adapter);
-            }
+        String path = "img/"+d.getImageStr();
+
+        try {
+          am = this.getResources().getAssets();
+          is = am.open(path);
+
+          Bitmap bitmap = BitmapFactory.decodeStream(is);
+
+          imgV.setImageBitmap(bitmap);
+
+          is.close();
+        }catch (Exception e){
+            Log.i("test",e.getMessage());
         }
-
-        else {
-            for (int i = 1; i <= 3; i++) {
-                images[i - 1] = getApplicationContext().getResources().getIdentifier("c_" + ID + "_" + i, "drawable", "com.example.hh.caunavi_proto");
-                viewPager = (ViewPager) findViewById(R.id.view);
-                adapter = new Adapter(this, images);
-                viewPager.setAdapter(adapter);
-            }
-        }
-
-
-
-
 
         startGuideButton = (Button)findViewById(R.id.startGuideButton);
         startGuideButton.setOnClickListener(new View.OnClickListener() {
