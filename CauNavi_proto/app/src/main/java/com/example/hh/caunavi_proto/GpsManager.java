@@ -19,11 +19,11 @@ import android.support.v4.content.ContextCompat;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.w3c.dom.Text;
+
 public class GpsManager extends Service implements LocationListener {
 
     private final Context mContext;
-
-    private TextView gpsText;
 
     // 현재 GPS 사용유무
     boolean isGPSEnabled = false;
@@ -43,10 +43,11 @@ public class GpsManager extends Service implements LocationListener {
 
     protected LocationManager locationManager;
 
-    public GpsManager(Context context, TextView t) {
+    TextView t;
+
+    public GpsManager(Context context) {
         this.mContext = context;
         getLocation();
-        gpsText = t;
     }
 
 
@@ -84,7 +85,6 @@ public class GpsManager extends Service implements LocationListener {
                         location = locationManager
                                 .getLastKnownLocation(LocationManager.GPS_PROVIDER);
                         if (location != null) {
-                            this.isGetLocation = true;
                             lat = location.getLatitude();
                             lon = location.getLongitude();
                         }
@@ -104,11 +104,15 @@ public class GpsManager extends Service implements LocationListener {
     }
 
     public void onLocationChanged(Location location) {
-        lat = location.getLatitude();
-        lon = location.getLongitude();
 
-        String str = String.format("%.6f , %.6f /// %d",lat,lon,(int)location.getAccuracy());
-        gpsText.setText(str);
+        if(true){
+            this.isGetLocation = true;
+            lat = location.getLatitude();
+            lon = location.getLongitude();
+        }else{
+            this.isGetLocation = false;
+        }
+
     }
 
     public void onStatusChanged(String provider, int status, Bundle extras) {

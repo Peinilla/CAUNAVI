@@ -1,5 +1,7 @@
 package com.example.hh.caunavi_proto;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.hardware.Sensor;
@@ -13,6 +15,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Gravity;
@@ -56,6 +59,7 @@ import com.google.ar.core.exceptions.UnavailableSdkTooOldException;
 import com.google.ar.core.exceptions.UnavailableUserDeclinedInstallationException;
 
 import java.io.IOException;
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -75,6 +79,7 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
     private GLSurfaceView surfaceView;
     private GpsManager gps;
     private MapManager mapManager;
+    private Context mContext;
     // 지도 경로
 
     private boolean installRequested;
@@ -112,6 +117,7 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
     private float modelAngle;
 
     private TextView angleText;
+    private TextView destView;
 
     private Timer timer;
     private TimerTask timerTask;
@@ -140,6 +146,7 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         setContentView(R.layout.activity_ar);
         surfaceView = findViewById(R.id.preview);
         displayRotationHelper = new DisplayRotationHelper(/*context=*/ this);
+        mContext = this;
 
         setMenuView();
         isDestinationSet = false;
@@ -163,6 +170,7 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         installRequested = false;
 
         angleText = (TextView)findViewById(R.id.headangle);
+        destView = (TextView)findViewById(R.id.gpsText);
 
         SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 
@@ -202,7 +210,6 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
             }
         };
 
-
         sensorManager.registerListener(mListener,
                 sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
                 SensorManager.SENSOR_DELAY_UI);
@@ -212,12 +219,10 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
                 sensorManager.SENSOR_DELAY_UI);
 
 
-        gps = new GpsManager(this,(TextView)findViewById(R.id.gpsText));
+        gps = new GpsManager(this);
 
         mapManager = new MapManager(this);
-        ///
-        //mapManager.setDestination(0,gps.lat,gps.lon); // 테스트용
-        ///
+
         timerTask = new TimerTask() {
             @Override
             public void run() {
@@ -229,12 +234,22 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
                                     setDest();
                                 isDestinationSet = true;
                             }
-                            setArrow(mapManager.getNextBearingTest(gps.lat, gps.lon));
+                            angleText.setText("현재위치 : " + mapManager.getNearPoint());
+                            if(!mapManager.isArrivalDest()) {
+                                setArrow(mapManager.getNextBearingTest(gps.lat, gps.lon));
+                            }else{
+                                end();
+                            }
+                        }else{
+                            angleText.setText("GPS 정보가 없습니다.");
                         }
                     }
                 });
             }
         };
+
+        Intent intent = new Intent(getApplicationContext(), NaviPopupActivity.class);
+        startActivityForResult(intent, 1);
 
         timer = new Timer();
         timer.schedule(timerTask,5000,3000);
@@ -548,21 +563,7 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         float[] rMatrix = new float[16];
         float[] tempM = new float[16];
 
-        if (rollAngle < -90 || rollAngle > 90){ // 사용자가 핸드폰을 들고 하늘을 바라볼때
-            if (headingAngle < 0 ) {
-                headingAngle += 180;
-            }
-            else {
-                headingAngle -= 180;
-            }
-            pitchAngle = pitchAngle*(-1) - 90;
-        }
-        else{// 사용자가 핸드폰을 들고 땅을 바라볼때
-            headingAngle += 360;
-            pitchAngle += 90;
-        }
-        // else headingAngle += 360;
-
+        AngleAdjustment(destinationAngle);
 
         Matrix.setIdentityM(tMatrix, 0);
         Matrix.translateM(tMatrix, 0, 0f, 0.2f, -3.0f);
@@ -570,7 +571,7 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         Matrix.setIdentityM(rMatrix,0);
         //Matrix.translateM(tMatrix, 0, (float)Math.sin(270 + headingAngle), -0.2f, -(float)Math.cos(270 + headingAngle));
 
-        Matrix.setRotateM(rMatrix,0,headingAngle - destinationAngle,0f,1f,0f); // 화살표가 동으로
+        Matrix.setRotateM(rMatrix,0,headingAngle - destinationAngle,0f,1f,0f);
         Matrix.multiplyMM(tMatrix,0,tMatrix,0,rMatrix,0);
 
         Matrix.setRotateM(rMatrix, 0, pitchAngle, -1.0f, 0.0f,  0.0f);
@@ -589,8 +590,28 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         }
     }
 // TODO : 방향 조정 다 끝나면 여기로
-    public void AngleAdjustment() {
+    public void AngleAdjustment(float destinationAngle) {
 
+        if (rollAngle < -90 || rollAngle > 90){ // 사용자가 핸드폰을 들고 하늘을 바라볼때
+            if (headingAngle < 0 ) {
+                headingAngle += 180;
+            }
+            else {
+                headingAngle -= 180;
+            }
+            pitchAngle = pitchAngle*(-1) - 90;
+
+            if (Math.abs(headingAngle)<90)
+                pitchAngle *= -1;
+
+        }
+        else{// 사용자가 핸드폰을 들고 땅을 바라볼때
+            headingAngle += 360;
+            pitchAngle += 90;
+
+            if (headingAngle > 270 || headingAngle <90)
+                pitchAngle *= -1;
+        }
     }
 
     public void drawerOpen(View v){
@@ -652,8 +673,37 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
 
     public void setDest(){
         mapManager.setDestination(destinationID,gps.lat,gps.lon);
-        Log.i("dest",destinationID +"  asdf");
         Toast.makeText(this, ""+destinationID+"관으로", Toast.LENGTH_SHORT).show();
-        angleText.setText(""+destinationID+"관");
+        destView.setText("목적지 : " + destinationID+"관");
+        testList.clear();
+    }
+
+    public void end(){
+        onPause();
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("목적지에 도착했습니다.");
+        builder.setMessage("목적지의 정보를 보시겠습니까?");
+        builder.setPositiveButton("아니오", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                finish();
+            }
+        });
+        builder.setNegativeButton("예", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                Intent intent = new Intent(getApplicationContext(), InfoViewActivity.class);
+                intent.putExtra("b_id",destinationID+"");
+
+                startActivity(intent);
+                finish();
+            }
+        });        builder.show();
+    }
+
+    @Override
+    public void finish() {
+        timer.cancel();
+        super.finish();
     }
 }
