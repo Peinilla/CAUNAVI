@@ -78,10 +78,6 @@ public class InfoViewActivity extends AppCompatActivity {
             }
         }
 
-
-
-
-
         startGuideButton = (Button)findViewById(R.id.startGuideButton);
         startGuideButton.setOnClickListener(new View.OnClickListener() {
             @Override

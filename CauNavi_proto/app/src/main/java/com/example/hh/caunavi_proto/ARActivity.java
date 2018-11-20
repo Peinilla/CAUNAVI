@@ -79,8 +79,11 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
     private GLSurfaceView surfaceView;
     private GpsManager gps;
     private MapManager mapManager;
+    private BuildingGuideManager buildingGuideManager;
     private Context mContext;
     // 지도 경로
+
+    private int mode;
 
     private boolean installRequested;
 
@@ -127,6 +130,8 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
     private int destinationID;
     private boolean isDestinationSet;
 
+    private ArrayList<String> nearBuildingInfo;
+
     // Anchors created from taps used for object placing with a given color.
     private static class ColoredAnchor {
         public final Anchor anchor;
@@ -154,7 +159,7 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         Intent i = new Intent();
         i = getIntent();
         destinationID = i.getIntExtra("Build_id",0);
-        Log.i("destinationID", Integer.toString(destinationID));
+        mode = i.getIntExtra("Mode",-1);
 
         // Set up tap listener.
         tapHelper = new TapHelper(/*context=*/ this);
@@ -222,6 +227,7 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         gps = new GpsManager(this);
 
         mapManager = new MapManager(this);
+        buildingGuideManager = new BuildingGuideManager(this);
 
         timerTask = new TimerTask() {
             @Override
@@ -229,16 +235,19 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        if(!isDestinationSet){
+                            setDest();
+                        }
                         if(gps.isGetLocation) {
-                            if(!isDestinationSet){
-                                    setDest();
-                                isDestinationSet = true;
-                            }
                             angleText.setText("현재위치 : " + mapManager.getNearPoint());
                             if(!mapManager.isArrivalDest()) {
                                 setArrow(mapManager.getNextBearingTest(gps.lat, gps.lon));
                             }else{
                                 end();
+                            }
+                            if(mode == 1){ // mode 1 = 자유투어
+                                nearBuildingInfo = new ArrayList<>();
+                                nearBuildingInfo = buildingGuideManager.getBearingNearBuilding(gps.lat,gps.lon);
                             }
                         }else{
                             angleText.setText("GPS 정보가 없습니다.");
@@ -248,12 +257,10 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
             }
         };
 
-        Intent intent = new Intent(getApplicationContext(), NaviPopupActivity.class);
-        startActivityForResult(intent, 1);
-
         timer = new Timer();
         timer.schedule(timerTask,5000,3000);
 
+        setDest();
     }
 
     @Override
@@ -508,6 +515,8 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
             }
             modelAngle++;
 
+            setNearBuildingMark();
+
         } catch (Throwable t) {
             // Avoid crashing the application due to unhandled exceptions.
             Log.e(TAG, "Exception on the OpenGL thread", t);
@@ -643,6 +652,7 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
                 switch (position) {
                     case 0: // menu1
                         Intent intent = new Intent(getApplicationContext(), NaviPopupActivity.class);
+                        intent.putExtra("Mode",0);
                         startActivityForResult(intent, 1);
                         break;
                     case 1: // menu2
@@ -663,19 +673,26 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
             if(resultCode==RESULT_OK){
                 //데이터 받기
                 destinationID = data.getIntExtra("result",0);
-                if(destinationID != 0){
-                    setDest();
-                    isDestinationSet = true;
-                }
+                setDest();
             }
         }
     }
 
     public void setDest(){
-        mapManager.setDestination(destinationID,gps.lat,gps.lon);
-        Toast.makeText(this, ""+destinationID+"관으로", Toast.LENGTH_SHORT).show();
-        destView.setText("목적지 : " + destinationID+"관");
-        testList.clear();
+        if(destinationID != 0) {
+            isDestinationSet = true;
+
+            mapManager.setDestination(destinationID, gps.lat, gps.lon);
+            Toast.makeText(this, "" + destinationID + "관으로", Toast.LENGTH_SHORT).show();
+            destView.setText("목적지 : " + destinationID + "관");
+            testList.clear();
+        }
+    }
+
+    public void setNearBuildingMark(){
+        for(int inx = 0; inx < nearBuildingInfo.size(); inx ++){
+            String str[] = nearBuildingInfo.get(inx).split("\t");
+        }
     }
 
     public void end(){
@@ -700,6 +717,8 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
             }
         });        builder.show();
     }
+
+
 
     @Override
     public void finish() {
