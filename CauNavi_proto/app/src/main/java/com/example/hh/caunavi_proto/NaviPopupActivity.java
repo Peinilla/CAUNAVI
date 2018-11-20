@@ -12,19 +12,31 @@ import android.widget.Button;
 public class NaviPopupActivity extends Activity {
 
     private int building_ID;
-    private Button b;
+    private int mode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_info);
+        setContentView(R.layout.activity_popup);
 
+        Intent i = new Intent();
+        i = getIntent();
+        mode = i.getIntExtra("Mode",-1);
     }
 
     public void sendResult(){
-        Intent intent = new Intent();
-        intent.putExtra("result", building_ID);
-        setResult(RESULT_OK, intent);
+        Intent i;
+        if(mode == 1) {
+            i = new Intent(this, ARActivity.class);
+            i.putExtra("Build_id", getBuilding_ID());
+            startActivity(i);
+        }else if(mode == 0){
+            i = new Intent();
+            i.putExtra("result", building_ID);
+            setResult(RESULT_OK, i);
+        }else{
+
+        }
 
         finish();
     }
@@ -42,5 +54,19 @@ public class NaviPopupActivity extends Activity {
             return false;
         }
         return true;
+    }
+
+    public int getBuilding_ID(){
+        int id;
+
+//      청룡탕, 의혈탑 체크
+//        if(building_ID != ){
+//
+//        }
+//
+
+        id = building_ID;
+
+        return id;
     }
 }

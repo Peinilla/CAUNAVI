@@ -60,7 +60,7 @@ public class InfoViewActivity extends AppCompatActivity {
         name.setText(""+ ID +"관\n"+d.getName());
         content.setText(d.getText());
 
-        if(ID==209 || ID==304) {
+        if(ID==209 || ID==304 || ID==309) {
             for (int i = 1; i <= 2; i++) {
                 images2[i - 1] = getApplicationContext().getResources().getIdentifier("c_" + ID + "_" + i, "drawable", "com.example.hh.caunavi_proto");
                 viewPager = (ViewPager) findViewById(R.id.view);
@@ -77,10 +77,6 @@ public class InfoViewActivity extends AppCompatActivity {
                 viewPager.setAdapter(adapter);
             }
         }
-
-
-
-
 
         startGuideButton = (Button)findViewById(R.id.startGuideButton);
         startGuideButton.setOnClickListener(new View.OnClickListener() {
