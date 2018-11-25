@@ -17,14 +17,18 @@ import android.support.annotation.Nullable;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.google.ar.core.Anchor;
@@ -119,11 +123,14 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
 
     private float modelAngle;
 
-    private TextView angleText;
+    private TextView currentView;
     private TextView destView;
+    private ArrayList<Button> markerList;
 
     private Timer timer;
     private TimerTask timerTask;
+    private Timer tourModeTimer;
+    private TimerTask tourModeTimerTask;
 
     private ListView listView;
 
@@ -132,6 +139,10 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
     private boolean isPhoneLookSky = false;
 
     private ArrayList<String> nearBuildingInfo;
+
+    private int dpi;
+    private float density;
+    private int displayWidth;
 
     // Anchors created from taps used for object placing with a given color.
     private static class ColoredAnchor {
@@ -175,8 +186,34 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
 
         installRequested = false;
 
-        angleText = (TextView)findViewById(R.id.headangle);
-        destView = (TextView)findViewById(R.id.gpsText);
+        currentView = (TextView)findViewById(R.id.current);
+        destView = (TextView)findViewById(R.id.destination);
+        //
+        markerList = new ArrayList<>();
+        Button b1 = (Button)findViewById(R.id.marker1);
+        markerList.add(b1);
+        Button b2 = (Button)findViewById(R.id.marker2);
+        markerList.add(b2);
+        Button b3 = (Button)findViewById(R.id.marker3);
+        markerList.add(b3);
+        Button b4 = (Button)findViewById(R.id.marker4);
+        markerList.add(b4);
+        Button b5 = (Button)findViewById(R.id.marker5);
+        markerList.add(b5);
+        //
+
+        // get Display Size
+        DisplayMetrics outMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(outMetrics);
+        dpi = outMetrics.densityDpi;
+        density =  outMetrics.density;
+
+        Display display = getWindowManager().getDefaultDisplay();
+        android.graphics.Point size = new android.graphics.Point();
+        display.getSize(size);
+        displayWidth = size.x;
+
+        //
 
         SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 
@@ -239,22 +276,25 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        setMarker();
                         if(!isDestinationSet){
                             setDest();
                         }
                         if(gps.isGetLocation) {
-                            angleText.setText("현재위치 : " + mapManager.getNearPoint());
+                            currentView.setText("현재위치 : " + mapManager.getNearPoint());
                             if(!mapManager.isArrivalDest()) {
                                 setArrow(mapManager.getNextBearingTest(gps.lat, gps.lon));
                             }else{
                                 end();
                             }
                             if(mode == 1){ // mode 1 = 자유투어
+                                buildingGuideManager.setNearBuilding(gps.lat,gps.lon);
+
                                 nearBuildingInfo = new ArrayList<>();
                                 nearBuildingInfo = buildingGuideManager.getBearingNearBuilding(gps.lat,gps.lon);
                             }
                         }else{
-                            angleText.setText("GPS 정보가 없습니다.");
+                            currentView.setText("GPS 정보가 없습니다.");
                         }
                     }
                 });
@@ -265,6 +305,10 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         timer.schedule(timerTask,5000,3000);
 
         setDest();
+        buildingGuideManager.setNearBuilding(gps.lat,gps.lon);
+        nearBuildingInfo = new ArrayList<>();
+        nearBuildingInfo = buildingGuideManager.getBearingNearBuilding(gps.lat,gps.lon);
+
     }
 
     @Override
@@ -519,12 +563,13 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
             }
             modelAngle++;
 
-            setNearBuildingMark();
+            setMarker();
 
         } catch (Throwable t) {
             // Avoid crashing the application due to unhandled exceptions.
             Log.e(TAG, "Exception on the OpenGL thread", t);
         }
+
     }
 
     // Handle only one tap per frame, as taps are usually low frequency compared to frame rate.
@@ -703,12 +748,6 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         }
     }
 
-    public void setNearBuildingMark(){
-        for(int inx = 0; inx < nearBuildingInfo.size(); inx ++){
-            String str[] = nearBuildingInfo.get(inx).split("\t");
-        }
-    }
-
     public void end(){
         onPause();
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -732,7 +771,46 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         });        builder.show();
     }
 
+    public void setMarker(){
+        if(nearBuildingInfo.equals(null)){
+            return;
+        }
+        for(int inx = 0; inx < markerList.size(); inx ++) {
+            markerList.get(inx).setVisibility(View.INVISIBLE);
+        }
+        for(int inx = 0; inx < nearBuildingInfo.size(); inx ++) {
+            String[] str = nearBuildingInfo.get(inx).split("\t");
+            markerList.get(inx).setText(str[0]);
+            float angle = convertAngle(Float.parseFloat(str[1]));
 
+            if(Math.abs(angle) < 60) {
+                RelativeLayout.LayoutParams layoutParamValue= (RelativeLayout.LayoutParams) markerList.get(inx).getLayoutParams();
+                layoutParamValue.leftMargin = getDp(angle);
+                markerList.get(inx).setLayoutParams(layoutParamValue);
+                markerList.get(inx).setVisibility(View.VISIBLE);
+            }
+        }
+
+    }
+    public float convertAngle(float angle){
+        float temp = headingAngle;
+
+        if (isPhoneLookSky){ // 사용자가 핸드폰을 들고 하늘을 바라볼때
+           temp += 180;
+        }
+        else{// 사용자가 핸드폰을 들고 땅을 바라볼때
+        }
+        Log.i("test" ,"앵글 : " + temp + "   // " + angle);
+
+        return temp - angle;
+    }
+
+    public int getDp(float angle){
+        int widthDP = (displayWidth * 160 / dpi) - 20;
+
+        angle += 60;
+        return (int) (widthDP / 120 * angle);
+    }
 
     @Override
     public void finish() {

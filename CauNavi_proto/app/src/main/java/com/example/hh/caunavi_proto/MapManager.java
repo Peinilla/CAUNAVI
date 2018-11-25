@@ -93,7 +93,7 @@ public class MapManager {
 
     public void setDestination(int destination, double lat, double lon){
         setNearPointID(lat,lon);
-        this.destinationID = getDestinationID(destination);
+        destinationID = getDestinationID(destination);
         nextPointID = nearPointID;
         prevPointID = nearPointID;
 
@@ -122,8 +122,6 @@ public class MapManager {
         }
         mToast = Toast.makeText(mContext.getApplicationContext(),"경로 재탐색중", Toast.LENGTH_LONG);
         mToast.show();
-
-        isDestination = true;
 
         Log.i("test", "near : " + nearPointID);
 
@@ -260,7 +258,7 @@ public class MapManager {
         }catch (Exception e){
             Log.i("test",e.getMessage());
         }
-        return 0;
+        return 10000;
     }
 
     public ArrayList<Integer> getRoute(int start, int end) {
