@@ -29,7 +29,6 @@ public class NaviPopupActivity extends Activity {
         if(mode == 1) {
             i = new Intent(this, ARActivity.class);
             i.putExtra("Build_id", getBuilding_ID());
-            i.putExtra("Mode",0);
             startActivity(i);
         }else if(mode == 0){
             i = new Intent();

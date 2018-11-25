@@ -129,6 +129,7 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
 
     private int destinationID;
     private boolean isDestinationSet;
+    private boolean isPhoneLookSky = false;
 
     private ArrayList<String> nearBuildingInfo;
 
@@ -203,6 +204,9 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
                     headingAngle = (float) Math.toDegrees(values[0]);
                     pitchAngle = (float) Math.toDegrees(values[1]);
                     rollAngle = (float) Math.toDegrees(values[2]);
+
+                    if (rollAngle < -90 || rollAngle > 90)
+                        isPhoneLookSky = true;
 
 
                     //angleText.setText((String.valueOf(headingAngle)));
@@ -583,7 +587,17 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         Matrix.setRotateM(rMatrix,0,headingAngle - destinationAngle,0f,1f,0f);
         Matrix.multiplyMM(tMatrix,0,tMatrix,0,rMatrix,0);
 
-        Matrix.setRotateM(rMatrix, 0, pitchAngle, -1.0f, 0.0f,  0.0f);
+        float tempAngle = headingAngle-destinationAngle;
+        if (tempAngle < 0)
+            tempAngle += 360;
+        if (tempAngle > 180)
+            tempAngle -= 360;
+
+        tempAngle = Math.abs(tempAngle);
+        if (tempAngle<90)
+            Matrix.setRotateM(rMatrix, 0, pitchAngle * ((90-tempAngle)/90), -1.0f, 0.0f,  0.0f);
+        else
+            Matrix.setRotateM(rMatrix, 0, pitchAngle * ((tempAngle-90)/90), 1.0f, 0.0f, 0.0f);
         Matrix.multiplyMM(tMatrix, 0, tMatrix, 0, rMatrix, 0);
 
 
@@ -600,26 +614,26 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
     }
 // TODO : 방향 조정 다 끝나면 여기로
     public void AngleAdjustment(float destinationAngle) {
-
-        if (rollAngle < -90 || rollAngle > 90){ // 사용자가 핸드폰을 들고 하늘을 바라볼때
+        if (isPhoneLookSky){ // 사용자가 핸드폰을 들고 하늘을 바라볼때
             if (headingAngle < 0 ) {
                 headingAngle += 180;
             }
             else {
                 headingAngle -= 180;
             }
-            pitchAngle = pitchAngle*(-1) - 90;
 
-            if (Math.abs(headingAngle)<90)
-                pitchAngle *= -1;
+            if (headingAngle<0)
+                headingAngle +=360;
+
+            pitchAngle += 90;
 
         }
         else{// 사용자가 핸드폰을 들고 땅을 바라볼때
-            headingAngle += 360;
-            pitchAngle += 90;
+            if (headingAngle < 0)
+                headingAngle += 360;
 
-            if (headingAngle > 270 || headingAngle <90)
-                pitchAngle *= -1;
+            pitchAngle += 90;
+            pitchAngle *= -1;
         }
     }
 
