@@ -578,18 +578,27 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
 
         AngleAdjustment(destinationAngle);
 
+        if (destinationAngle < 0)
+            destinationAngle += 360;
+        //destinationAngle 값은 0 ~ 360이 된다
+
         Matrix.setIdentityM(tMatrix, 0);
         Matrix.translateM(tMatrix, 0, 0f, 0.2f, -3.0f);
 
         Matrix.setIdentityM(rMatrix,0);
         //Matrix.translateM(tMatrix, 0, (float)Math.sin(270 + headingAngle), -0.2f, -(float)Math.cos(270 + headingAngle));
 
-        Matrix.setRotateM(rMatrix,0,headingAngle - destinationAngle,0f,1f,0f);
+        float headRotateAngle = destinationAngle - headingAngle;
+        if (headRotateAngle < 0)
+            headRotateAngle += 360;
+
+        Matrix.setRotateM(rMatrix,0,headRotateAngle,0f,1f,0f);
         Matrix.multiplyMM(tMatrix,0,tMatrix,0,rMatrix,0);
 
         float tempAngle = headingAngle-destinationAngle;
         if (tempAngle < 0)
             tempAngle += 360;
+        // tempAngle 값은 0 ~ 360이 된다.
         if (tempAngle > 180)
             tempAngle -= 360;
 
@@ -624,6 +633,7 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
 
             if (headingAngle<0)
                 headingAngle +=360;
+            // headingAngle 값은 0 ~ 360이 된다
 
             pitchAngle += 90;
 
