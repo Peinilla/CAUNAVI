@@ -64,7 +64,6 @@ public class NaviPopupActivity extends Activity {
 //
 //        }
 //
-
         id = building_ID;
 
         return id;

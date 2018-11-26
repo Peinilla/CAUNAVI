@@ -242,11 +242,9 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
                     pitchAngle = (float) Math.toDegrees(values[1]);
                     rollAngle = (float) Math.toDegrees(values[2]);
 
-                    if (rollAngle < -90 || rollAngle > 90)
+                    if (rollAngle < -90 || rollAngle > 90) {
                         isPhoneLookSky = true;
-
-
-                    //angleText.setText((String.valueOf(headingAngle)));
+                    }
                 }
             }
 
@@ -289,7 +287,6 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
                             }
                             if(mode == 1){ // mode 1 = 자유투어
                                 buildingGuideManager.setNearBuilding(gps.lat,gps.lon);
-
                                 nearBuildingInfo = new ArrayList<>();
                                 nearBuildingInfo = buildingGuideManager.getBearingNearBuilding(gps.lat,gps.lon);
                             }
@@ -309,6 +306,21 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         nearBuildingInfo = new ArrayList<>();
         nearBuildingInfo = buildingGuideManager.getBearingNearBuilding(gps.lat,gps.lon);
 
+
+        tourModeTimerTask = new TimerTask() {
+            @Override
+            public void run() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        setMarker();
+                    }
+                });
+            }
+        };
+
+        tourModeTimer = new Timer();
+        tourModeTimer.schedule(tourModeTimerTask,5000,100);
     }
 
     @Override
@@ -563,8 +575,6 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
             }
             modelAngle++;
 
-            setMarker();
-
         } catch (Throwable t) {
             // Avoid crashing the application due to unhandled exceptions.
             Log.e(TAG, "Exception on the OpenGL thread", t);
@@ -621,22 +631,21 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         float[] rMatrix = new float[16];
         float[] tempM = new float[16];
 
-        AngleAdjustment(destinationAngle);
+        float adjustAngle = AngleAdjustment();
+        float headRotateAngle = destinationAngle - adjustAngle;
+        if(headRotateAngle < 0) {
+            headRotateAngle += 360;
+        }
 
         Matrix.setIdentityM(tMatrix, 0);
         Matrix.translateM(tMatrix, 0, 0f, 0.2f, -3.0f);
-
         Matrix.setIdentityM(rMatrix,0);
-        //Matrix.translateM(tMatrix, 0, (float)Math.sin(270 + headingAngle), -0.2f, -(float)Math.cos(270 + headingAngle));
 
-        float headRotateAngle = destinationAngle - headingAngle;
-        if(headRotateAngle < 0)
-            headRotateAngle += 360;
         
         Matrix.setRotateM(rMatrix, 0, headRotateAngle, 0f, 1f, 0f);
         Matrix.multiplyMM(tMatrix,0,tMatrix,0,rMatrix,0);
 
-        float tempAngle = headingAngle-destinationAngle;
+        float tempAngle = adjustAngle - destinationAngle;
         if (tempAngle < 0)
             tempAngle += 360;
         if (tempAngle > 180)
@@ -662,28 +671,31 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         }
     }
 // TODO : 방향 조정 다 끝나면 여기로
-    public void AngleAdjustment(float destinationAngle) {
+    public float AngleAdjustment() {
+        float adjustAngle = headingAngle;
         if (isPhoneLookSky){ // 사용자가 핸드폰을 들고 하늘을 바라볼때
-            if (headingAngle < 0 ) {
-                headingAngle += 180;
+            if (adjustAngle < 0 ) {
+                adjustAngle += 180;
             }
             else {
-                headingAngle -= 180;
+                adjustAngle -= 180;
             }
 
-            if (headingAngle<0)
-                headingAngle +=360;
+            if (adjustAngle<0)
+                adjustAngle +=360;
 
             pitchAngle += 90;
 
         }
         else{// 사용자가 핸드폰을 들고 땅을 바라볼때
-            if (headingAngle < 0)
-                headingAngle += 360;
+            if (adjustAngle < 0)
+                adjustAngle += 360;
 
             pitchAngle += 90;
             pitchAngle *= -1;
         }
+
+        return adjustAngle;
     }
 
     public void drawerOpen(View v){
@@ -787,33 +799,37 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
             markerList.get(inx).setText(str[0]);
             float angle = convertAngle(Float.parseFloat(str[1]));
 
-            if(Math.abs(angle) < 60) {
+            if(Math.abs(angle - 180) > 120) {
+                markerList.get(inx).setVisibility(View.VISIBLE);
                 RelativeLayout.LayoutParams layoutParamValue= (RelativeLayout.LayoutParams) markerList.get(inx).getLayoutParams();
                 layoutParamValue.leftMargin = getDp(angle);
                 markerList.get(inx).setLayoutParams(layoutParamValue);
-                markerList.get(inx).setVisibility(View.VISIBLE);
+
+                //Log.i("test2", layoutParamValue.leftMargin + "");
             }
         }
 
     }
-    public float convertAngle(float angle){
-        float temp = headingAngle;
-
-        if (isPhoneLookSky){ // 사용자가 핸드폰을 들고 하늘을 바라볼때
-           temp += 180;
+    public float convertAngle(float destinationAngle){
+        float adjustAngle = AngleAdjustment();
+        float headRotateAngle = destinationAngle - adjustAngle;
+        if(headRotateAngle < 0) {
+            headRotateAngle += 360;
         }
-        else{// 사용자가 핸드폰을 들고 땅을 바라볼때
-        }
-        Log.i("test" ,"앵글 : " + temp + "   // " + angle);
-
-        return temp - angle;
+        return headRotateAngle;
     }
 
     public int getDp(float angle){
-        int widthDP = (displayWidth * 160 / dpi) - 20;
 
-        angle += 60;
-        return (int) (widthDP / 120 * angle);
+        int widthDP = (displayWidth * 160 / dpi) - 20;
+        Log.i("test2", widthDP+ "");
+
+        if(angle <= 60){
+            angle += 60;
+        }else if(angle >= 300){
+            angle -= 300;
+        }
+        return (int) (widthDP * angle * 2.8 / 120);
     }
 
     @Override
@@ -821,4 +837,6 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         timer.cancel();
         super.finish();
     }
+
+
 }

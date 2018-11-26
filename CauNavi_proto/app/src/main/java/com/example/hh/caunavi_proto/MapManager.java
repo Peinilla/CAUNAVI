@@ -84,7 +84,7 @@ public class MapManager {
         init();
     }
     public void init() {
-        destinationID = 0;
+        destinationID = -1;
         nearPointID = 0;
         nextPointID = 0;
         prevPointID = 0;
@@ -96,6 +96,11 @@ public class MapManager {
         destinationID = getDestinationID(destination);
         nextPointID = nearPointID;
         prevPointID = nearPointID;
+
+        if(destinationID == -1){
+            isDestination = false;
+            return;
+        }
 
         route = new ArrayList<>();
         route = getRoute(nearPointID,destinationID);
@@ -258,7 +263,8 @@ public class MapManager {
         }catch (Exception e){
             Log.i("test",e.getMessage());
         }
-        return 10000;
+
+        return -1;
     }
 
     public ArrayList<Integer> getRoute(int start, int end) {
