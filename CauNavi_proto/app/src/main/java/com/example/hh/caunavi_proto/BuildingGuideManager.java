@@ -1,13 +1,8 @@
 package com.example.hh.caunavi_proto;
 
 import android.content.Context;
-import android.content.res.AssetManager;
 import android.location.Location;
-import android.util.Log;
-import android.widget.Toast;
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+
 import java.util.ArrayList;
 
 
@@ -15,6 +10,7 @@ public class BuildingGuideManager {
 
     private Context mContext;
     private ArrayList<buildingInfo> buildingList;
+    private ArrayList<Integer> nearBuildingIdList;
 
     public class buildingInfo {
         String name;
@@ -33,7 +29,6 @@ public class BuildingGuideManager {
         b.id = 310;
         b.location.setLatitude(37.503835);
         b.location.setLongitude(126.955869);
-
         buildingList.add(b);
 
         b = new buildingInfo();
@@ -45,6 +40,20 @@ public class BuildingGuideManager {
         ///
     }
 
+    public void setNearBuilding(double lat, double lon) {
+        nearBuildingIdList = new ArrayList<>();
+
+        Location currentLocation = new Location("Current");
+        currentLocation.setLatitude(lat);
+        currentLocation.setLatitude(lon);
+
+        for (int inx = 0; inx < buildingList.size(); inx++) {
+            if (currentLocation.distanceTo(buildingList.get(inx).location) > 80) {
+                nearBuildingIdList.add(inx);
+            }
+        }
+    }
+
     public ArrayList<String> getBearingNearBuilding(double lat, double lon) {
         ArrayList<String> result = new ArrayList<>();
 
@@ -52,10 +61,10 @@ public class BuildingGuideManager {
         currentLocation.setLatitude(lat);
         currentLocation.setLatitude(lon);
 
-        for (int inx = 0; inx < buildingList.size(); inx++) {
-            if (currentLocation.distanceTo(buildingList.get(inx).location) < 80) {
-                String str = buildingList.get(inx).name + "\t" + currentLocation.bearingTo(buildingList.get(inx).location);
-            }
+        for (int inx = 0; inx < nearBuildingIdList.size(); inx++) {
+            buildingInfo b = buildingList.get(nearBuildingIdList.get(inx));
+            String str = b.name + "\t" + currentLocation.bearingTo(b.location);
+            result.add(str);
         }
 
         return result;

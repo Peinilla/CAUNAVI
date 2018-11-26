@@ -26,41 +26,113 @@
                 android:layout_height="match_parent"
                 android:visibility="visible" />
 
-            <LinearLayout
+            <Button
+                android:id="@+id/marker1"
+                android:layout_width="80dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginBottom="10dp"
+                android:background="#00000000"
+                android:drawableTop="@drawable/marker"
+                android:text="Button"
+                android:visibility="invisible" />
+
+            <Button
+                android:id="@+id/marker2"
+                android:layout_width="80dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginBottom="10dp"
+                android:background="#00000000"
+                android:drawableTop="@drawable/marker"
+                android:text="Button"
+                android:visibility="invisible" />
+
+            <Button
+                android:id="@+id/marker3"
+                android:layout_width="80dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginBottom="10dp"
+                android:background="#00000000"
+                android:drawableTop="@drawable/marker"
+                android:text="Button"
+                android:visibility="invisible" />
+
+            <Button
+                android:id="@+id/marker4"
+                android:layout_width="80dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginBottom="10dp"
+                android:background="#00000000"
+                android:drawableTop="@drawable/marker"
+                android:text="Button"
+                android:visibility="invisible" />
+
+            <Button
+                android:id="@+id/marker5"
+                android:layout_width="80dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginBottom="10dp"
+                android:background="#00000000"
+                android:drawableTop="@drawable/marker"
+                android:text="Button"
+                android:visibility="invisible" />
+
+            <TextView
+                android:id="@+id/destination"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignParentBottom="false"
-                android:gravity="right"
-                android:orientation="vertical">
+                android:layout_below="@+id/marker1"
+                android:layout_marginTop="10dp"
+                android:layout_toRightOf="@+id/draw_button"
+                android:editable="false"
+                android:ems="10"
+                android:gravity="center"
+                android:inputType="textPersonName"
+                android:singleLine="false"
+                android:text="gpsText"
+                android:textSize="24sp" />
 
-                <ImageView
-                    android:id="@+id/draw_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="left"
-                    android:layout_marginLeft="20dp"
-                    android:layout_marginTop="20dp"
-                    android:alpha="0.5"
-                    android:onClick="drawerOpen"
-                    app:srcCompat="@drawable/draw_button2" />
+            <TextView
+                android:id="@+id/current"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/destination"
+                android:layout_marginTop="10dp"
+                android:layout_toRightOf="@+id/draw_button"
+                android:editable="false"
+                android:ems="10"
+                android:gravity="center"
+                android:inputType="textPersonName"
+                android:singleLine="false"
+                android:text="gpsText"
+                android:textSize="24sp" />
 
-                <TextView
-                    android:id="@+id/gpsText"
-                    android:layout_width="match_parent"
-                    android:layout_height="92dp"
-                    android:editable="false"
-                    android:ems="10"
-                    android:inputType="textPersonName"
-                    android:singleLine="false"
-                    android:text="gpsText"
-                    android:textSize="24sp" />
-
-                <TextView
-                    android:id="@+id/headangle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="TextView" />
-            </LinearLayout>
+            <ImageView
+                android:id="@+id/draw_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/marker1"
+                android:layout_gravity="left"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginRight="10dp"
+                android:alpha="0.5"
+                android:onClick="drawerOpen"
+                app:srcCompat="@drawable/draw_button2" />
 
         </RelativeLayout>
 
