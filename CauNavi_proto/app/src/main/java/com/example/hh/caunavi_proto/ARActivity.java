@@ -629,7 +629,11 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         Matrix.setIdentityM(rMatrix,0);
         //Matrix.translateM(tMatrix, 0, (float)Math.sin(270 + headingAngle), -0.2f, -(float)Math.cos(270 + headingAngle));
 
-        Matrix.setRotateM(rMatrix,0,headingAngle - destinationAngle,0f,1f,0f);
+        float headRotateAngle = destinationAngle - headingAngle;
+        if(headRotateAngle < 0)
+            headRotateAngle += 360;
+        
+        Matrix.setRotateM(rMatrix, 0, headRotateAngle, 0f, 1f, 0f);
         Matrix.multiplyMM(tMatrix,0,tMatrix,0,rMatrix,0);
 
         float tempAngle = headingAngle-destinationAngle;
