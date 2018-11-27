@@ -299,6 +299,7 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
                             setDest();
                         }
                         if(gps.isGetLocation) {
+                            mapManager.setNearPointID(gps.lat,gps.lon);
                             currentView.setText("현재위치 : " + mapManager.getNearPoint());
 
                             if(mode == 1){
