@@ -59,9 +59,9 @@ public class BuildingGuideManager {
         currentLocation.setLatitude(lon);
 
         for (int inx = 0; inx < buildingList.size(); inx++) {
-            if (currentLocation.distanceTo(buildingList.get(inx).location) > 80) {
+            if (currentLocation.distanceTo(buildingList.get(inx).location) < 80) {
                 // 근처 건물은 5개까지만
-                if(nearBuildingIdList.size() <= 5) {
+                if(nearBuildingIdList.size() < 5) {
                     nearBuildingIdList.add(inx);
                 }
             }

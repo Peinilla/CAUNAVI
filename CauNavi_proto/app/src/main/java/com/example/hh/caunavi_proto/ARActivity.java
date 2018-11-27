@@ -249,9 +249,11 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
 //                        isPhoneLookSky = true;
 //                    }
 //                }
-                headingAngle = orientationValue[0];
-                pitchAngle = orientationValue[1];
-                rollAngle = orientationValue[2];
+                if(orientationValue != null) {
+                    headingAngle = orientationValue[0];
+                    pitchAngle = orientationValue[1];
+                    rollAngle = orientationValue[2];
+                }
             }
 
             @Override
@@ -658,9 +660,7 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
 //            tempAngle -= 360;
 
        // Matrix.setRotateM(rMatrix, 0, pitchAngle * ((90 - tempAngle) / 90), -1.0f, 0.0f, 0.0f);
-
-        Matrix.multiplyMM(tMatrix, 0, tMatrix, 0, rMatrix, 0);
-
+        //Matrix.multiplyMM(tMatrix, 0, tMatrix, 0, rMatrix, 0);
 
         Matrix.setIdentityM(tempM, 0);
         Matrix.invertM(tempM,0,viewmtx,0);
@@ -791,7 +791,7 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
             markerList.get(inx).setText(str[0]);
             //float angle = convertAngle(Float.parseFloat(str[1]));
             float angle = Float.parseFloat(str[1]) - headingAngle;
-            if(Math.abs(angle - 180) > 120) {
+            if(Math.abs(angle) < 60) {
                 markerList.get(inx).setVisibility(View.VISIBLE);
                 RelativeLayout.LayoutParams layoutParamValue= (RelativeLayout.LayoutParams) markerList.get(inx).getLayoutParams();
                 layoutParamValue.leftMargin = getDp(angle);
