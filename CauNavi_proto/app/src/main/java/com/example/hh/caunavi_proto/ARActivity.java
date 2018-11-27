@@ -300,6 +300,7 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
                         }
                         if(gps.isGetLocation) {
                             currentView.setText("현재위치 : " + mapManager.getNearPoint());
+                            Log.i("cur_info", mapManager.getNearPoint());
 
                             if(mode == 1){
                                 // 자유투어모드 일때
