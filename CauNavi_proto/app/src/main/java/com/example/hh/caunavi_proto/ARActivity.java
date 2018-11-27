@@ -145,6 +145,8 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
     private float density;
     private int displayWidth;
 
+    private RelativeLayout topBar;
+
     // Anchors created from taps used for object placing with a given color.
     private static class ColoredAnchor {
         public final Anchor anchor;
@@ -165,6 +167,7 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         surfaceView = findViewById(R.id.preview);
         displayRotationHelper = new DisplayRotationHelper(/*context=*/ this);
         mContext = this;
+
 
         setMenuView();
         isDestinationSet = false;
@@ -824,12 +827,12 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
     public int getDp(float angle){
         Log.i("displaywidth : ", displayWidth+"");
 
-        int widthDP = (displayWidth * 160 / dpi) - 30;
+        int widthDP = (displayWidth * 160 / dpi) - 20;
         Log.i("test2", angle + "");
 
         angle+=60;
 
-        return (int) (widthDP * angle * 2.8 / 120);
+        return (int) (widthDP * angle * 2.8 / 120) - 120;
     }
 
     @Override
