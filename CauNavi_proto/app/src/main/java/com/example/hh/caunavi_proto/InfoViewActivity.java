@@ -1,29 +1,16 @@
 package com.example.hh.caunavi_proto;
 
 import android.content.Intent;
-import android.content.res.AssetManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
-import android.view.ViewParent;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.hh.caunavi_proto.common.helpers.Adapter;
 import com.example.hh.caunavi_proto.common.helpers.BuildingDataHelper;
 import com.example.hh.caunavi_proto.common.helpers.BuildingData;
-
-
-
-import com.example.hh.caunavi_proto.R;
-
-import org.w3c.dom.Text;
-
-import java.io.InputStream;
 
 public class InfoViewActivity extends AppCompatActivity {
 

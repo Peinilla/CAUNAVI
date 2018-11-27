@@ -169,11 +169,6 @@ public class MapManager {
             } else{
                 String nameNext = mapDataArrayList.get(nextPointID).name;
                 float bearing = tempLoc.bearingTo(mapDataArrayList.get(nextPointID).location);
-                if(mToast != null) {
-                    mToast.cancel();
-                }
-                mToast = Toast.makeText(mContext.getApplicationContext(),nameNext + "/" + distNext + "m"  , Toast.LENGTH_SHORT);
-                //mToast.show();
                 return bearing;
             }
         }else{
@@ -202,11 +197,7 @@ public class MapManager {
                 String namePrev = mapDataArrayList.get(prevPointID).name;
                 String nameNext = mapDataArrayList.get(nextPointID).name;
                 float bearing = tempLoc.bearingTo(mapDataArrayList.get(nextPointID).location);
-                if(mToast != null) {
-                    mToast.cancel();
-                }
-                mToast = Toast.makeText(mContext.getApplicationContext(),nameNext + "\n" + distNext + "m"  , Toast.LENGTH_SHORT);
-                mToast.show();
+
                 if(bearing < 0){
                     bearing += 360;
                 }
@@ -215,11 +206,7 @@ public class MapManager {
                 String namePrev = mapDataArrayList.get(prevPointID).name;
                 String nameNext = mapDataArrayList.get(nextPointID).name;
                 float bearing = mapDataArrayList.get(prevPointID).location.bearingTo(mapDataArrayList.get(nextPointID).location);
-                if(mToast != null) {
-                    mToast.cancel();
-                }
-                mToast = Toast.makeText(mContext.getApplicationContext(),namePrev + "->" + nameNext + "\n" + distNext + "m"  , Toast.LENGTH_SHORT);
-                mToast.show();
+
                 if(bearing < 0){
                     bearing += 360;
                 }

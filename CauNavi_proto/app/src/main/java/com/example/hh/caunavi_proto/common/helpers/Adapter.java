@@ -1,4 +1,4 @@
-package com.example.hh.caunavi_proto;
+package com.example.hh.caunavi_proto.common.helpers;
 
 import android.content.Context;
 import android.support.annotation.NonNull;

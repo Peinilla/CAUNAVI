@@ -22,8 +22,15 @@ public class MainActivity extends AppCompatActivity {
             case R.id.button3 :
                 startActivity(new Intent(this, NaviPopupActivity.class).putExtra("Mode",1));
                 break;
+            case R.id.button :
+                // 캠퍼스투어 모드
+                startActivity(new Intent(this, NaviPopupActivity.class).putExtra("Mode",0));
+                break;
             case R.id.button4 :
-                startActivity(new Intent(this, NaviPopupActivity.class));
+                // 자유투어 모드
+                Intent i = new Intent(this, ARActivity.class);
+                i.putExtra("Mode", 1);
+                startActivity(i);
                 break;
             case R.id.button5 :
                 startActivity(new Intent(this,InfoActivity.class));

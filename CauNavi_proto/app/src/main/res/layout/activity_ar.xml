@@ -36,7 +36,6 @@
                     android:layout_height="1dp"
                     android:layout_centerVertical="true"
                     android:background="@color/colorBlack">
-
                 </View>
 
             </RelativeLayout>
@@ -45,69 +44,69 @@
                 android:id="@+id/marker1"
                 android:layout_width="80dp"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:layout_marginTop="10dp"
-                android:layout_marginRight="10dp"
                 android:layout_marginBottom="10dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="10dp"
                 android:background="#00000000"
                 android:drawableTop="@drawable/marker"
                 android:textColor="@color/colorBlack"
-                android:visibility="visible" />
+                android:visibility="invisible" />
 
             <Button
                 android:id="@+id/marker2"
                 android:layout_width="80dp"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:layout_marginTop="10dp"
-                android:layout_marginRight="10dp"
                 android:layout_marginBottom="10dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="10dp"
                 android:background="#00000000"
                 android:drawableTop="@drawable/marker"
-                android:textColor="@color/colorBlack"
                 android:text="Button"
+                android:textColor="@color/colorBlack"
                 android:visibility="invisible" />
 
             <Button
                 android:id="@+id/marker3"
                 android:layout_width="80dp"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:layout_marginTop="10dp"
-                android:layout_marginRight="10dp"
                 android:layout_marginBottom="10dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="10dp"
                 android:background="#00000000"
                 android:drawableTop="@drawable/marker"
-                android:textColor="@color/colorBlack"
                 android:text="Button"
+                android:textColor="@color/colorBlack"
                 android:visibility="invisible" />
 
             <Button
                 android:id="@+id/marker4"
                 android:layout_width="80dp"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:layout_marginTop="10dp"
-                android:layout_marginRight="10dp"
                 android:layout_marginBottom="10dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="10dp"
                 android:background="#00000000"
                 android:drawableTop="@drawable/marker"
-                android:textColor="@color/colorBlack"
                 android:text="Button"
+                android:textColor="@color/colorBlack"
                 android:visibility="invisible" />
 
             <Button
                 android:id="@+id/marker5"
                 android:layout_width="80dp"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="340dp"
-                android:layout_marginTop="10dp"
-                android:layout_marginRight="10dp"
                 android:layout_marginBottom="10dp"
+                android:layout_marginLeft="340dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="10dp"
                 android:background="#00000000"
                 android:drawableTop="@drawable/marker"
-                android:textColor="@color/colorBlack"
                 android:text="Button"
+                android:textColor="@color/colorBlack"
                 android:visibility="invisible" />
 
             <TextView
@@ -122,9 +121,8 @@
                 android:gravity="center"
                 android:inputType="textPersonName"
                 android:singleLine="false"
-                android:text="gpsText"
-                android:textSize="24sp"
-                android:textColor="@color/colorBlack"/>
+                android:textColor="@color/colorBlack"
+                android:textSize="24sp" />
 
             <TextView
                 android:id="@+id/current"
@@ -138,9 +136,9 @@
                 android:gravity="center"
                 android:inputType="textPersonName"
                 android:singleLine="false"
-                android:text="gpsText"
-                android:textSize="24sp"
-                android:textColor="@color/colorBlack" />
+                android:text="GPS 수집중..."
+                android:textColor="@color/colorBlack"
+                android:textSize="24sp" />
 
             <ImageView
                 android:id="@+id/draw_button"

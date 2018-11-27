@@ -63,7 +63,6 @@ import com.google.ar.core.exceptions.UnavailableSdkTooOldException;
 import com.google.ar.core.exceptions.UnavailableUserDeclinedInstallationException;
 
 import java.io.IOException;
-import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -88,6 +87,7 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
     // 지도 경로
 
     private int mode;
+    private int campusTourRoute;
 
     private boolean installRequested;
 
@@ -108,7 +108,7 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
 
     int count = 0;
 
-    private ArrayList<float[]> testList = new ArrayList<>();
+    private ArrayList<float[]> arrowList = new ArrayList<>();
     private ArrayList<Float> rotateList = new ArrayList<>();
 
     float[] projmtx = new float[16];
@@ -176,6 +176,11 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         i = getIntent();
         destinationID = i.getIntExtra("Build_id",0);
         mode = i.getIntExtra("Mode",-1);
+        // -1 : 길찾기, 0 : 캠퍼스투어 , 1 : 자유투어
+
+        campusTourRoute = i.getIntExtra("CampusTourRoute", -1);
+
+
 
         // Set up tap listener.
         tapHelper = new TapHelper(/*context=*/ this);
@@ -290,21 +295,27 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        setMarker();
                         if(!isDestinationSet){
                             setDest();
                         }
                         if(gps.isGetLocation) {
                             currentView.setText("현재위치 : " + mapManager.getNearPoint());
-                            if(!mapManager.isArrivalDest()) {
-                                setArrow(mapManager.getNextBearingTest(gps.lat, gps.lon));
-                            }else{
-                                end();
+
+                            if(mode == 1){
+                                // 자유투어모드 일때
                             }
-                            if(mode == 1){ // mode 1 = 자유투어
-                                buildingGuideManager.setNearBuilding(gps.lat,gps.lon);
-                                nearBuildingInfo = new ArrayList<>();
-                                nearBuildingInfo = buildingGuideManager.getBearingNearBuilding(gps.lat,gps.lon);
+                            else if(mode == 0){
+                                // 캠퍼스투어모드 일때
+                                // 캠퍼스 투어모드 길찾기
+
+                            }
+                            else{
+                                // 길찾기 모드일때
+                                if (!mapManager.isArrivalDest()) {
+                                    setArrow(mapManager.getNextBearingTest(gps.lat, gps.lon));
+                                } else {
+                                    end();
+                                }
                             }
                         }else{
                             currentView.setText("GPS 정보가 없습니다.");
@@ -329,7 +340,17 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        setMarker();
+                        if(mode == 0 || mode == 1) {
+                            // 캠퍼투어모드, 자유투어모드 일때만 건물마커 표시
+                            if(count == 5){
+                                buildingGuideManager.setNearBuilding(gps.lat,gps.lon);
+                                nearBuildingInfo = new ArrayList<>();
+                                nearBuildingInfo = buildingGuideManager.getBearingNearBuilding(gps.lat,gps.lon);
+                                count = 0;
+                            }
+                            count ++;
+                            setMarker();
+                        }
                     }
                 });
             }
@@ -337,6 +358,10 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
 
         tourModeTimer = new Timer();
         tourModeTimer.schedule(tourModeTimerTask,5000,100);
+
+        if(mode == 1){
+            destView.setText("자유투어 모드");
+        }
     }
 
     @Override
@@ -585,8 +610,8 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
                 //virtualObjectShadow.draw(viewmtx, projmtx, colorCorrectionRgba, coloredAnchor.color);
             }
 
-            for(int inx = 0; inx < testList.size(); inx ++) {
-                virtualObject.updateModelMatrix(testList.get(inx), scaleFactor,modelAngle,headingAngle);
+            for(int inx = 0; inx < arrowList.size(); inx ++) {
+                virtualObject.updateModelMatrix(arrowList.get(inx), scaleFactor,modelAngle,headingAngle);
                 virtualObject.draw(viewmtx, projmtx, colorCorrectionRgba, new float[]{66.0f, 133.0f, 244.0f, 180.0f});
             }
             modelAngle++;
@@ -675,11 +700,11 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         Matrix.invertM(tempM,0,viewmtx,0);
         Matrix.multiplyMM(tempM,0,tempM,0,tMatrix, 0);
 
-        if(testList.size() <= 10) {
-            testList.add(tempM);
+        if(arrowList.size() <= 10) {
+            arrowList.add(tempM);
         }else{
-            testList.remove(0);
-            testList.add(tempM);
+            arrowList.remove(0);
+            arrowList.add(tempM);
         }
     }
 // TODO : 방향 조정 다 끝나면 여기로
@@ -728,7 +753,7 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
                 switch (position) {
                     case 0: // menu1
                         Intent intent = new Intent(getApplicationContext(), NaviPopupActivity.class);
-                        intent.putExtra("Mode",0);
+                        intent.putExtra("Mode",2);
                         startActivityForResult(intent, 1);
                         break;
                     case 1: // menu2
@@ -756,12 +781,18 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
 
     public void setDest(){
         if(destinationID != 0) {
-            isDestinationSet = true;
+            if(mode == -1) {
+                isDestinationSet = true;
 
-            mapManager.setDestination(destinationID, gps.lat, gps.lon);
-            Toast.makeText(this, "" + destinationID + "관으로", Toast.LENGTH_SHORT).show();
-            destView.setText("목적지 : " + destinationID + "관");
-            testList.clear();
+                mapManager.setDestination(destinationID, gps.lat, gps.lon);
+                Toast.makeText(this, "" + destinationID + "관으로", Toast.LENGTH_SHORT).show();
+                destView.setText("목적지 : " + destinationID + "관");
+                arrowList.clear();
+            }else if(mode == 0){
+                isDestinationSet = true;
+
+
+            }
         }
     }
 
