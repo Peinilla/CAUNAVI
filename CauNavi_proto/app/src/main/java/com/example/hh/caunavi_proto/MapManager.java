@@ -207,6 +207,9 @@ public class MapManager {
                 }
                 mToast = Toast.makeText(mContext.getApplicationContext(),nameNext + "\n" + distNext + "m"  , Toast.LENGTH_SHORT);
                 mToast.show();
+                if(bearing < 0){
+                    bearing += 360;
+                }
                 return bearing;
             }else{
                 String namePrev = mapDataArrayList.get(prevPointID).name;
@@ -217,6 +220,9 @@ public class MapManager {
                 }
                 mToast = Toast.makeText(mContext.getApplicationContext(),namePrev + "->" + nameNext + "\n" + distNext + "m"  , Toast.LENGTH_SHORT);
                 mToast.show();
+                if(bearing < 0){
+                    bearing += 360;
+                }
                 return bearing;
             }
         }else{
@@ -227,6 +233,9 @@ public class MapManager {
             }
             else{
                 float bearing = mapDataArrayList.get(prevPointID).location.bearingTo(mapDataArrayList.get(nextPointID).location);
+                if(bearing < 0){
+                    bearing += 360;
+                }
                 return bearing;
             }
         }

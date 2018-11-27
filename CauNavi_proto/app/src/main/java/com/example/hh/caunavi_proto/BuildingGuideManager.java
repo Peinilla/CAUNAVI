@@ -1,8 +1,14 @@
 package com.example.hh.caunavi_proto;
 
 import android.content.Context;
+import android.content.res.AssetManager;
 import android.location.Location;
+import android.util.Log;
+import android.widget.Toast;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 
@@ -20,24 +26,29 @@ public class BuildingGuideManager {
 
     public BuildingGuideManager(Context context) {
         mContext = context;
+        AssetManager am = mContext.getResources().getAssets();
+        InputStream is =  null;
 
         buildingList = new ArrayList<>();
+        try{
+            is = am.open("map/new_buildings.txt");
+            BufferedReader bufrd = new BufferedReader(new InputStreamReader(is,"UTF-8"));
 
-        ///test
-        buildingInfo b = new buildingInfo();
-        b.name = "310관";
-        b.id = 310;
-        b.location.setLatitude(37.503835);
-        b.location.setLongitude(126.955869);
-        buildingList.add(b);
+            String line = bufrd.readLine();
+            while((line = bufrd.readLine()) != null){
+                String str[] = line.split("\t");
+                buildingInfo b = new buildingInfo();
+                b.name = str[3];
+                b.id = Integer.parseInt(str[0]);
+                b.location.setLatitude(Float.parseFloat(str[1]));
+                b.location.setLongitude(Float.parseFloat(str[2]));
 
-        b = new buildingInfo();
-        b.name = "208관";
-        b.id = 208;
-        b.location.setLatitude(37.503552);
-        b.location.setLongitude(126.957046);
-        buildingList.add(b);
-        ///
+                buildingList.add(b);
+            }
+            bufrd.close();
+        }catch (Exception e){
+            Log.i("test", e.getMessage());
+        }
     }
 
     public void setNearBuilding(double lat, double lon) {
@@ -49,7 +60,10 @@ public class BuildingGuideManager {
 
         for (int inx = 0; inx < buildingList.size(); inx++) {
             if (currentLocation.distanceTo(buildingList.get(inx).location) > 80) {
-                nearBuildingIdList.add(inx);
+                // 근처 건물은 5개까지만
+                if(nearBuildingIdList.size() <= 5) {
+                    nearBuildingIdList.add(inx);
+                }
             }
         }
     }
@@ -63,7 +77,11 @@ public class BuildingGuideManager {
 
         for (int inx = 0; inx < nearBuildingIdList.size(); inx++) {
             buildingInfo b = buildingList.get(nearBuildingIdList.get(inx));
-            String str = b.name + "\t" + currentLocation.bearingTo(b.location);
+            float bearing = currentLocation.bearingTo(b.location);
+            if(bearing < 0){
+                bearing += 360;
+            }
+            String str = b.name + "\t" + bearing;
             result.add(str);
         }
 

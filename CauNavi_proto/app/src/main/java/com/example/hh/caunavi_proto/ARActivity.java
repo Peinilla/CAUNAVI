@@ -116,6 +116,7 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
 
     private float[] accelValue;
     private float[] magneticValue;
+    private float[] orientationValue;
 
     private float headingAngle;
     private float pitchAngle;
@@ -223,29 +224,34 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
                 float[] v = sensorEvent.values;
 
                 switch (sensorEvent.sensor.getType()){
-                    case Sensor.TYPE_ACCELEROMETER:
-                        accelValue = v;
+                    case Sensor.TYPE_ORIENTATION:
+                        orientationValue = v;
                         break;
-                    case Sensor.TYPE_MAGNETIC_FIELD:
-                        magneticValue = v;
-                        break;
-
+//                    case Sensor.TYPE_ACCELEROMETER:
+//                        accelValue = v;
+//                        break;
+//                    case Sensor.TYPE_MAGNETIC_FIELD:
+//                        magneticValue = v;
+//                        break;
                 }
 
-                if(accelValue != null && magneticValue != null){
-                    float[] values = new float[3];
-                    float[] mr = new float[9];
-
-                    SensorManager.getRotationMatrix(mr, null, accelValue, magneticValue);
-                    SensorManager.getOrientation(mr, values);
-                    headingAngle = (float) Math.toDegrees(values[0]);
-                    pitchAngle = (float) Math.toDegrees(values[1]);
-                    rollAngle = (float) Math.toDegrees(values[2]);
-
-                    if (rollAngle < -90 || rollAngle > 90) {
-                        isPhoneLookSky = true;
-                    }
-                }
+//                if(accelValue != null && magneticValue != null){
+//                    float[] values = new float[3];
+//                    float[] mr = new float[9];
+//
+//                    SensorManager.getRotationMatrix(mr, null, accelValue, magneticValue);
+//                    SensorManager.getOrientation(mr, values);
+//                    headingAngle = (float) Math.toDegrees(values[0]);
+//                    pitchAngle = (float) Math.toDegrees(values[1]);
+//                    rollAngle = (float) Math.toDegrees(values[2]);
+//
+//                    if (rollAngle < -90 || rollAngle > 90) {
+//                        isPhoneLookSky = true;
+//                    }
+//                }
+                headingAngle = orientationValue[0];
+                pitchAngle = orientationValue[1];
+                rollAngle = orientationValue[2];
             }
 
             @Override
@@ -631,31 +637,28 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         float[] rMatrix = new float[16];
         float[] tempM = new float[16];
 
-        float adjustAngle = AngleAdjustment();
-        float headRotateAngle = destinationAngle - adjustAngle;
-        if(headRotateAngle < 0) {
-            headRotateAngle += 360;
-        }
+//        float adjustAngle = AngleAdjustment();
+//        float headRotateAngle = destinationAngle - adjustAngle;
+//        if(headRotateAngle < 0) {
+//            headRotateAngle += 360;
+//        }
 
         Matrix.setIdentityM(tMatrix, 0);
         Matrix.translateM(tMatrix, 0, 0f, 0.2f, -3.0f);
         Matrix.setIdentityM(rMatrix,0);
 
         
-        Matrix.setRotateM(rMatrix, 0, headRotateAngle, 0f, 1f, 0f);
+        Matrix.setRotateM(rMatrix, 0, headingAngle - destinationAngle, 0f, 1f, 0f);
         Matrix.multiplyMM(tMatrix,0,tMatrix,0,rMatrix,0);
 
-        float tempAngle = adjustAngle - destinationAngle;
-        if (tempAngle < 0)
-            tempAngle += 360;
-        if (tempAngle > 180)
-            tempAngle -= 360;
+//        float tempAngle = adjustAngle - destinationAngle;
+//        if (tempAngle < 0)
+//            tempAngle += 360;
+//        if (tempAngle > 180)
+//            tempAngle -= 360;
 
-        tempAngle = Math.abs(tempAngle);
-        if (tempAngle<90)
-            Matrix.setRotateM(rMatrix, 0, pitchAngle * ((90-tempAngle)/90), -1.0f, 0.0f,  0.0f);
-        else
-            Matrix.setRotateM(rMatrix, 0, pitchAngle * ((tempAngle-90)/90), 1.0f, 0.0f, 0.0f);
+       // Matrix.setRotateM(rMatrix, 0, pitchAngle * ((90 - tempAngle) / 90), -1.0f, 0.0f, 0.0f);
+
         Matrix.multiplyMM(tMatrix, 0, tMatrix, 0, rMatrix, 0);
 
 
@@ -674,23 +677,12 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
     public float AngleAdjustment() {
         float adjustAngle = headingAngle;
         if (isPhoneLookSky){ // 사용자가 핸드폰을 들고 하늘을 바라볼때
-            if (adjustAngle < 0 ) {
-                adjustAngle += 180;
-            }
-            else {
-                adjustAngle -= 180;
-            }
-
-            if (adjustAngle<0)
-                adjustAngle +=360;
+            adjustAngle += 180;
+            adjustAngle %= 360;
 
             pitchAngle += 90;
-
         }
         else{// 사용자가 핸드폰을 들고 땅을 바라볼때
-            if (adjustAngle < 0)
-                adjustAngle += 360;
-
             pitchAngle += 90;
             pitchAngle *= -1;
         }
@@ -797,8 +789,8 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         for(int inx = 0; inx < nearBuildingInfo.size(); inx ++) {
             String[] str = nearBuildingInfo.get(inx).split("\t");
             markerList.get(inx).setText(str[0]);
-            float angle = convertAngle(Float.parseFloat(str[1]));
-
+            //float angle = convertAngle(Float.parseFloat(str[1]));
+            float angle = Float.parseFloat(str[1]) - headingAngle;
             if(Math.abs(angle - 180) > 120) {
                 markerList.get(inx).setVisibility(View.VISIBLE);
                 RelativeLayout.LayoutParams layoutParamValue= (RelativeLayout.LayoutParams) markerList.get(inx).getLayoutParams();
