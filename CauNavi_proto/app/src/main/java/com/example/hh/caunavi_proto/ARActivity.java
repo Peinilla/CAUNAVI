@@ -263,13 +263,18 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         };
 
         sensorManager.registerListener(mListener,
+                sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION),
+                SensorManager.SENSOR_DELAY_UI);
+
+        /*
+        sensorManager.registerListener(mListener,
                 sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
                 SensorManager.SENSOR_DELAY_UI);
 
         sensorManager.registerListener(mListener,
                 sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD),
                 sensorManager.SENSOR_DELAY_UI);
-
+        */
 
         gps = new GpsManager(this);
 
@@ -649,7 +654,8 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         Matrix.translateM(tMatrix, 0, 0f, 0.2f, -3.0f);
         Matrix.setIdentityM(rMatrix,0);
 
-        
+        Log.i("heading : ", Float.toString(headingAngle));
+        Log.i("dest :", Float.toString(destinationAngle));
         Matrix.setRotateM(rMatrix, 0, headingAngle - destinationAngle, 0f, 1f, 0f);
         Matrix.multiplyMM(tMatrix,0,tMatrix,0,rMatrix,0);
 
@@ -790,7 +796,11 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
             String[] str = nearBuildingInfo.get(inx).split("\t");
             markerList.get(inx).setText(str[0]);
             //float angle = convertAngle(Float.parseFloat(str[1]));
-            float angle = Float.parseFloat(str[1]) - headingAngle;
+            float buildingAngle = Float.parseFloat(str[1]);
+            float angle = buildingAngle - headingAngle;
+            if (angle > 300)
+                angle -= 360;
+            Log.i("buildingAngle : ", buildingAngle+", headngangle"+headingAngle+", angle :"+angle);
             if(Math.abs(angle) < 60) {
                 markerList.get(inx).setVisibility(View.VISIBLE);
                 RelativeLayout.LayoutParams layoutParamValue= (RelativeLayout.LayoutParams) markerList.get(inx).getLayoutParams();
@@ -812,15 +822,13 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
     }
 
     public int getDp(float angle){
+        Log.i("displaywidth : ", displayWidth+"");
 
-        int widthDP = (displayWidth * 160 / dpi) - 20;
-        Log.i("test2", widthDP+ "");
+        int widthDP = (displayWidth * 160 / dpi) - 30;
+        Log.i("test2", angle + "");
 
-        if(angle <= 60){
-            angle += 60;
-        }else if(angle >= 300){
-            angle -= 300;
-        }
+        angle+=60;
+
         return (int) (widthDP * angle * 2.8 / 120);
     }
 

@@ -56,7 +56,7 @@ public class BuildingGuideManager {
 
         Location currentLocation = new Location("Current");
         currentLocation.setLatitude(lat);
-        currentLocation.setLatitude(lon);
+        currentLocation.setLongitude(lon);
 
         for (int inx = 0; inx < buildingList.size(); inx++) {
             if (currentLocation.distanceTo(buildingList.get(inx).location) < 80) {
@@ -73,7 +73,7 @@ public class BuildingGuideManager {
 
         Location currentLocation = new Location("Current");
         currentLocation.setLatitude(lat);
-        currentLocation.setLatitude(lon);
+        currentLocation.setLongitude(lon);
 
         for (int inx = 0; inx < nearBuildingIdList.size(); inx++) {
             buildingInfo b = buildingList.get(nearBuildingIdList.get(inx));
