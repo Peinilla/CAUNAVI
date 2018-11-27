@@ -17,14 +17,18 @@ import android.support.annotation.Nullable;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.google.ar.core.Anchor;
@@ -119,18 +123,26 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
 
     private float modelAngle;
 
-    private TextView angleText;
+    private TextView currentView;
     private TextView destView;
+    private ArrayList<Button> markerList;
 
     private Timer timer;
     private TimerTask timerTask;
+    private Timer tourModeTimer;
+    private TimerTask tourModeTimerTask;
 
     private ListView listView;
 
     private int destinationID;
     private boolean isDestinationSet;
+    private boolean isPhoneLookSky = false;
 
     private ArrayList<String> nearBuildingInfo;
+
+    private int dpi;
+    private float density;
+    private int displayWidth;
 
     // Anchors created from taps used for object placing with a given color.
     private static class ColoredAnchor {
@@ -174,8 +186,34 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
 
         installRequested = false;
 
-        angleText = (TextView)findViewById(R.id.headangle);
-        destView = (TextView)findViewById(R.id.gpsText);
+        currentView = (TextView)findViewById(R.id.current);
+        destView = (TextView)findViewById(R.id.destination);
+        //
+        markerList = new ArrayList<>();
+        Button b1 = (Button)findViewById(R.id.marker1);
+        markerList.add(b1);
+        Button b2 = (Button)findViewById(R.id.marker2);
+        markerList.add(b2);
+        Button b3 = (Button)findViewById(R.id.marker3);
+        markerList.add(b3);
+        Button b4 = (Button)findViewById(R.id.marker4);
+        markerList.add(b4);
+        Button b5 = (Button)findViewById(R.id.marker5);
+        markerList.add(b5);
+        //
+
+        // get Display Size
+        DisplayMetrics outMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(outMetrics);
+        dpi = outMetrics.densityDpi;
+        density =  outMetrics.density;
+
+        Display display = getWindowManager().getDefaultDisplay();
+        android.graphics.Point size = new android.graphics.Point();
+        display.getSize(size);
+        displayWidth = size.x;
+
+        //
 
         SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 
@@ -204,8 +242,9 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
                     pitchAngle = (float) Math.toDegrees(values[1]);
                     rollAngle = (float) Math.toDegrees(values[2]);
 
-
-                    //angleText.setText((String.valueOf(headingAngle)));
+                    if (rollAngle < -90 || rollAngle > 90) {
+                        isPhoneLookSky = true;
+                    }
                 }
             }
 
@@ -235,22 +274,24 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        setMarker();
                         if(!isDestinationSet){
                             setDest();
                         }
                         if(gps.isGetLocation) {
-                            angleText.setText("현재위치 : " + mapManager.getNearPoint());
+                            currentView.setText("현재위치 : " + mapManager.getNearPoint());
                             if(!mapManager.isArrivalDest()) {
                                 setArrow(mapManager.getNextBearingTest(gps.lat, gps.lon));
                             }else{
                                 end();
                             }
                             if(mode == 1){ // mode 1 = 자유투어
+                                buildingGuideManager.setNearBuilding(gps.lat,gps.lon);
                                 nearBuildingInfo = new ArrayList<>();
                                 nearBuildingInfo = buildingGuideManager.getBearingNearBuilding(gps.lat,gps.lon);
                             }
                         }else{
-                            angleText.setText("GPS 정보가 없습니다.");
+                            currentView.setText("GPS 정보가 없습니다.");
                         }
                     }
                 });
@@ -261,6 +302,25 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         timer.schedule(timerTask,5000,3000);
 
         setDest();
+        buildingGuideManager.setNearBuilding(gps.lat,gps.lon);
+        nearBuildingInfo = new ArrayList<>();
+        nearBuildingInfo = buildingGuideManager.getBearingNearBuilding(gps.lat,gps.lon);
+
+
+        tourModeTimerTask = new TimerTask() {
+            @Override
+            public void run() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        setMarker();
+                    }
+                });
+            }
+        };
+
+        tourModeTimer = new Timer();
+        tourModeTimer.schedule(tourModeTimerTask,5000,100);
     }
 
     @Override
@@ -515,12 +575,11 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
             }
             modelAngle++;
 
-            setNearBuildingMark();
-
         } catch (Throwable t) {
             // Avoid crashing the application due to unhandled exceptions.
             Log.e(TAG, "Exception on the OpenGL thread", t);
         }
+
     }
 
     // Handle only one tap per frame, as taps are usually low frequency compared to frame rate.
@@ -572,18 +631,31 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         float[] rMatrix = new float[16];
         float[] tempM = new float[16];
 
-        AngleAdjustment(destinationAngle);
+        float adjustAngle = AngleAdjustment();
+        float headRotateAngle = destinationAngle - adjustAngle;
+        if(headRotateAngle < 0) {
+            headRotateAngle += 360;
+        }
 
         Matrix.setIdentityM(tMatrix, 0);
         Matrix.translateM(tMatrix, 0, 0f, 0.2f, -3.0f);
-
         Matrix.setIdentityM(rMatrix,0);
-        //Matrix.translateM(tMatrix, 0, (float)Math.sin(270 + headingAngle), -0.2f, -(float)Math.cos(270 + headingAngle));
 
-        Matrix.setRotateM(rMatrix,0,headingAngle - destinationAngle,0f,1f,0f);
+        
+        Matrix.setRotateM(rMatrix, 0, headRotateAngle, 0f, 1f, 0f);
         Matrix.multiplyMM(tMatrix,0,tMatrix,0,rMatrix,0);
 
-        Matrix.setRotateM(rMatrix, 0, pitchAngle, -1.0f, 0.0f,  0.0f);
+        float tempAngle = adjustAngle - destinationAngle;
+        if (tempAngle < 0)
+            tempAngle += 360;
+        if (tempAngle > 180)
+            tempAngle -= 360;
+
+        tempAngle = Math.abs(tempAngle);
+        if (tempAngle<90)
+            Matrix.setRotateM(rMatrix, 0, pitchAngle * ((90-tempAngle)/90), -1.0f, 0.0f,  0.0f);
+        else
+            Matrix.setRotateM(rMatrix, 0, pitchAngle * ((tempAngle-90)/90), 1.0f, 0.0f, 0.0f);
         Matrix.multiplyMM(tMatrix, 0, tMatrix, 0, rMatrix, 0);
 
 
@@ -599,28 +671,31 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         }
     }
 // TODO : 방향 조정 다 끝나면 여기로
-    public void AngleAdjustment(float destinationAngle) {
-
-        if (rollAngle < -90 || rollAngle > 90){ // 사용자가 핸드폰을 들고 하늘을 바라볼때
-            if (headingAngle < 0 ) {
-                headingAngle += 180;
+    public float AngleAdjustment() {
+        float adjustAngle = headingAngle;
+        if (isPhoneLookSky){ // 사용자가 핸드폰을 들고 하늘을 바라볼때
+            if (adjustAngle < 0 ) {
+                adjustAngle += 180;
             }
             else {
-                headingAngle -= 180;
+                adjustAngle -= 180;
             }
-            pitchAngle = pitchAngle*(-1) - 90;
 
-            if (Math.abs(headingAngle)<90)
-                pitchAngle *= -1;
+            if (adjustAngle<0)
+                adjustAngle +=360;
+
+            pitchAngle += 90;
 
         }
         else{// 사용자가 핸드폰을 들고 땅을 바라볼때
-            headingAngle += 360;
-            pitchAngle += 90;
+            if (adjustAngle < 0)
+                adjustAngle += 360;
 
-            if (headingAngle > 270 || headingAngle <90)
-                pitchAngle *= -1;
+            pitchAngle += 90;
+            pitchAngle *= -1;
         }
+
+        return adjustAngle;
     }
 
     public void drawerOpen(View v){
@@ -689,12 +764,6 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         }
     }
 
-    public void setNearBuildingMark(){
-        for(int inx = 0; inx < nearBuildingInfo.size(); inx ++){
-            String str[] = nearBuildingInfo.get(inx).split("\t");
-        }
-    }
-
     public void end(){
         onPause();
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -718,11 +787,56 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         });        builder.show();
     }
 
+    public void setMarker(){
+        if(nearBuildingInfo.equals(null)){
+            return;
+        }
+        for(int inx = 0; inx < markerList.size(); inx ++) {
+            markerList.get(inx).setVisibility(View.INVISIBLE);
+        }
+        for(int inx = 0; inx < nearBuildingInfo.size(); inx ++) {
+            String[] str = nearBuildingInfo.get(inx).split("\t");
+            markerList.get(inx).setText(str[0]);
+            float angle = convertAngle(Float.parseFloat(str[1]));
 
+            if(Math.abs(angle - 180) > 120) {
+                markerList.get(inx).setVisibility(View.VISIBLE);
+                RelativeLayout.LayoutParams layoutParamValue= (RelativeLayout.LayoutParams) markerList.get(inx).getLayoutParams();
+                layoutParamValue.leftMargin = getDp(angle);
+                markerList.get(inx).setLayoutParams(layoutParamValue);
+
+                //Log.i("test2", layoutParamValue.leftMargin + "");
+            }
+        }
+
+    }
+    public float convertAngle(float destinationAngle){
+        float adjustAngle = AngleAdjustment();
+        float headRotateAngle = destinationAngle - adjustAngle;
+        if(headRotateAngle < 0) {
+            headRotateAngle += 360;
+        }
+        return headRotateAngle;
+    }
+
+    public int getDp(float angle){
+
+        int widthDP = (displayWidth * 160 / dpi) - 20;
+        Log.i("test2", widthDP+ "");
+
+        if(angle <= 60){
+            angle += 60;
+        }else if(angle >= 300){
+            angle -= 300;
+        }
+        return (int) (widthDP * angle * 2.8 / 120);
+    }
 
     @Override
     public void finish() {
         timer.cancel();
         super.finish();
     }
+
+
 }
