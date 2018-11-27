@@ -296,7 +296,8 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
                     @Override
                     public void run() {
                         if(!isDestinationSet){
-                            setDest();
+                            if (mode != 1)
+                                setDest();
                         }
                         if(gps.isGetLocation) {
                             mapManager.setNearPointID(gps.lat,gps.lon);
@@ -330,7 +331,8 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         timer = new Timer();
         timer.schedule(timerTask,5000,3000);
 
-        setDest();
+        if (mode != 1)
+            setDest();
         buildingGuideManager.setNearBuilding(gps.lat,gps.lon);
         nearBuildingInfo = new ArrayList<>();
         nearBuildingInfo = buildingGuideManager.getBearingNearBuilding(gps.lat,gps.lon);
