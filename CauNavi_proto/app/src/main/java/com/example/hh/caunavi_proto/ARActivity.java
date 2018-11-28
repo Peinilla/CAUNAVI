@@ -296,8 +296,8 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
                     @Override
                     public void run() {
                         if(!isDestinationSet){
-                            if (mode != 1)
-                                setDest();
+                            //if (mode != 1)
+                            setDest();
                         }
                         if(gps.isGetLocation) {
                             mapManager.setNearPointID(gps.lat,gps.lon);
@@ -331,8 +331,8 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         timer = new Timer();
         timer.schedule(timerTask,5000,3000);
 
-        if (mode != 1)
-            setDest();
+        //if (mode != 1)
+        setDest();
         buildingGuideManager.setNearBuilding(gps.lat,gps.lon);
         nearBuildingInfo = new ArrayList<>();
         nearBuildingInfo = buildingGuideManager.getBearingNearBuilding(gps.lat,gps.lon);
@@ -836,9 +836,11 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
             //float angle = convertAngle(Float.parseFloat(str[1]));
             float buildingAngle = Float.parseFloat(str[1]);
             float angle = buildingAngle - headingAngle;
-            if (angle > 300)
+
+            if (angle > 300) {
                 angle -= 360;
-            Log.i("buildingAngle : ", buildingAngle+", headngangle"+headingAngle+", angle :"+angle);
+            }
+            Log.i("buildingNum : ", str[0]+"buildingAngle"+ buildingAngle+", headngangle : "+headingAngle+", angle :"+angle);
             if(Math.abs(angle) < 60) {
                 markerList.get(inx).setVisibility(View.VISIBLE);
                 RelativeLayout.LayoutParams layoutParamValue= (RelativeLayout.LayoutParams) markerList.get(inx).getLayoutParams();
