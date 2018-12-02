@@ -777,6 +777,7 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         if(requestCode==1){
             if(resultCode==RESULT_OK){
                 //데이터 받기
+                mode = -1; // 길찾기모드로 변경
                 destinationID = data.getIntExtra("result",0);
                 setDest();
             }
@@ -820,7 +821,8 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
                 startActivity(intent);
                 finish();
             }
-        });        builder.show();
+        });
+        builder.show();
     }
 
     public void setMarker(){
@@ -832,8 +834,13 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         }
         for(int inx = 0; inx < nearBuildingInfo.size(); inx ++) {
             String[] str = nearBuildingInfo.get(inx).split("\t");
-            markerList.get(inx).setText(str[0]);
-            //float angle = convertAngle(Float.parseFloat(str[1]));
+
+            if(str[2].equals("444") || str[2].equals("555") || str[2].equals("666")) {
+                markerList.get(inx).setText(str[0]);
+            }else{
+                markerList.get(inx).setText(str[0] + "\n" + str[2]);
+            }
+
             float buildingAngle = Float.parseFloat(str[1]);
             float angle = buildingAngle - headingAngle;
 
@@ -846,8 +853,6 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
                 RelativeLayout.LayoutParams layoutParamValue= (RelativeLayout.LayoutParams) markerList.get(inx).getLayoutParams();
                 layoutParamValue.leftMargin = getDp(angle);
                 markerList.get(inx).setLayoutParams(layoutParamValue);
-
-                //Log.i("test2", layoutParamValue.leftMargin + "");
             }
         }
 
@@ -870,6 +875,35 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         angle+=60;
 
         return (int) (widthDP * angle * 2.8 / 120) - 120;
+    }
+
+    public void onClickMarker(View v){
+        Button b = (Button)v;
+        final String[] str = b.getText().toString().split("\n");
+
+        if(str.length == 1){
+            return;
+        }
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("");
+        builder.setMessage(str[0] + "의 정보를 확인하시겠습니까?");
+        builder.setPositiveButton("아니오", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+            }
+        });
+        builder.setNegativeButton("예", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                Intent intent = new Intent(getApplicationContext(), InfoViewActivity.class);
+                intent.putExtra("b_id", str[1]);
+
+                startActivity(intent);
+            }
+        });
+        builder.show();
+
     }
 
     @Override

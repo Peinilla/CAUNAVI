@@ -40,7 +40,7 @@ public class MapManager {
         Toast mToast = new Toast(mContext.getApplicationContext());
 
         try{
-            is = am.open("map/new_map3.txt");
+            is = am.open("map/new_map.txt");
             BufferedReader bufrd = new BufferedReader(new InputStreamReader(is,"UTF-8"));
 
             String line = bufrd.readLine();
