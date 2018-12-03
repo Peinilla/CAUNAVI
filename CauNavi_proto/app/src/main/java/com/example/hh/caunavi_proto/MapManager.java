@@ -107,8 +107,6 @@ public class MapManager {
         if(mToast != null) {
             mToast.cancel();
         }
-        mToast = Toast.makeText(mContext.getApplicationContext(),destination +"관까지 안내를 시작합니다.", Toast.LENGTH_LONG);
-        mToast.show();
         Log.i("test", "near : " + nearPointID + "/lat : " + lat);
 
         Log.i("test", route.toString());

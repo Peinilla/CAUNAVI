@@ -109,13 +109,10 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
     int count = 0;
 
     private ArrayList<float[]> arrowList = new ArrayList<>();
-    private ArrayList<Float> rotateList = new ArrayList<>();
 
     float[] projmtx = new float[16];
     float[] viewmtx = new float[16];
 
-    private float[] accelValue;
-    private float[] magneticValue;
     private float[] orientationValue;
 
     private float headingAngle;
@@ -142,10 +139,10 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
     private ArrayList<String> nearBuildingInfo;
 
     private int dpi;
-    private float density;
     private int displayWidth;
 
-    private RelativeLayout topBar;
+    private int[] tourRoute = {10,102,101,201,204,206,303,207,310,302,301,11};
+    private int tourIndex;
 
     // Anchors created from taps used for object placing with a given color.
     private static class ColoredAnchor {
@@ -179,8 +176,14 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         // -1 : 길찾기, 0 : 캠퍼스투어 , 1 : 자유투어
 
         campusTourRoute = i.getIntExtra("CampusTourRoute", -1);
-
-
+        // 0 : 정문 , 1 : 후문
+        if(campusTourRoute == 0){
+            destinationID = 1;
+            tourIndex = 0;
+        }else{
+            destinationID = 1;
+            tourIndex = tourRoute.length - 1;
+        }
 
         // Set up tap listener.
         tapHelper = new TapHelper(/*context=*/ this);
@@ -215,7 +218,6 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         DisplayMetrics outMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(outMetrics);
         dpi = outMetrics.densityDpi;
-        density =  outMetrics.density;
 
         Display display = getWindowManager().getDefaultDisplay();
         android.graphics.Point size = new android.graphics.Point();
@@ -296,7 +298,6 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
                     @Override
                     public void run() {
                         if(!isDestinationSet){
-                            //if (mode != 1)
                             setDest();
                         }
                         if(gps.isGetLocation) {
@@ -308,11 +309,13 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
                                 // 자유투어모드 일때
                             }
                             else if(mode == 0){
-                                // 캠퍼스투어모드 일때
-                                // 캠퍼스 투어모드 길찾기
-
+                                if (!mapManager.isArrivalDest()) {
+                                setArrow(mapManager.getNextBearingTest(gps.lat, gps.lon));
+                                } else {
+                                end();
+                                }
                             }
-                            else{
+                            else if(mode == -1){
                                 // 길찾기 모드일때
                                 if (!mapManager.isArrivalDest()) {
                                     setArrow(mapManager.getNextBearingTest(gps.lat, gps.lon));
@@ -796,33 +799,107 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
             }else if(mode == 0){
                 isDestinationSet = true;
 
-
+                destinationID = tourRoute[tourIndex];
+                Log.i("test2",tourIndex +"");
+                mapManager.setDestination(destinationID, gps.lat, gps.lon);
+                if(destinationID == 10) {
+                    destView.setText("목적지 : 정문");
+                }else if( destinationID == 11){
+                    destView.setText("목적지 : 후문" );
+                }else{
+                    destView.setText("목적지 : " + destinationID + "관");
+                }
+                arrowList.clear();
+                if(campusTourRoute == 0){
+                    tourIndex++;
+                }else{
+                    tourIndex--;
+                }
             }
         }
     }
 
     public void end(){
-        onPause();
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("목적지에 도착했습니다.");
-        builder.setMessage("목적지의 정보를 보시겠습니까?");
-        builder.setPositiveButton("아니오", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                finish();
-            }
-        });
-        builder.setNegativeButton("예", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                Intent intent = new Intent(getApplicationContext(), InfoViewActivity.class);
-                intent.putExtra("b_id",destinationID+"");
+        if(mode == -1) {
+            onPause();
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("목적지에 도착했습니다.");
+            builder.setMessage("목적지의 정보를 보시겠습니까?");
+            builder.setPositiveButton("아니오", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    finish();
+                }
+            });
+            builder.setNegativeButton("예", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    Intent intent = new Intent(getApplicationContext(), InfoViewActivity.class);
+                    intent.putExtra("b_id", destinationID + "");
 
-                startActivity(intent);
-                finish();
+                    startActivity(intent);
+                    finish();
+                }
+            });
+            builder.show();
+        }else if(mode == 0){
+            if(campusTourRoute == 0){
+                if(destinationID == 11){
+                    onPause();
+                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    builder.setTitle("캠퍼스 투어가 종료 되었습니다.");
+                    builder.setNegativeButton("좋앗어요", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            finish();
+                        }
+                    });
+                    builder.show();
+                }else{
+                    campusTourNotice();
+                }
+            }else{
+                if(destinationID == 10){
+                    onPause();
+                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    builder.setTitle("캠퍼스 투어가 종료 되었습니다.");
+                    builder.setNegativeButton("좋앗어요", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            finish();
+                        }
+                    });
+                    builder.show();
+                }else{
+                    campusTourNotice();
+                }
             }
-        });
-        builder.show();
+        }
+    }
+
+    public void campusTourNotice(){
+        if(destinationID != 10 && destinationID != 11) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage("이 곳의 정보를 보시겠습니까?");
+            builder.setPositiveButton("아니오", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    setDest();
+                }
+            });
+            builder.setNegativeButton("예", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    Intent intent = new Intent(getApplicationContext(), InfoViewActivity.class);
+                    intent.putExtra("b_id", destinationID + "");
+                    startActivity(intent);
+                    setDest();
+                }
+            });
+            builder.show();
+        }else{
+            setDest();
+        }
     }
 
     public void setMarker(){
@@ -870,7 +947,6 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         Log.i("displaywidth : ", displayWidth+"");
 
         int widthDP = (displayWidth * 160 / dpi) - 20;
-        Log.i("test2", angle + "");
 
         angle+=60;
 
