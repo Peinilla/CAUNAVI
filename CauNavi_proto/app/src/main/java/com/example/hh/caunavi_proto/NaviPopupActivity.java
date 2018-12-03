@@ -29,7 +29,7 @@ public class NaviPopupActivity extends Activity {
         Intent i = new Intent();
         i = getIntent();
         mode = i.getIntExtra("Mode",-1);
-
+        // 0 : 메인에서 진입 , 1 : 메인에서 캠퍼스투어 , 2 : AR에서 진입
         adapter = new destinationAdapter(this);
         listView = (ListView)findViewById(R.id.listView);
 
@@ -52,6 +52,10 @@ public class NaviPopupActivity extends Activity {
                     route = position;
                     sendResult();
                 }else if(mode == 1){
+                    building_ID = Integer.parseInt(name[position].substring(0, 3));
+
+                    sendResult();
+                }else if(mode == 2){
                     building_ID = Integer.parseInt(name[position].substring(0, 3));
 
                     sendResult();

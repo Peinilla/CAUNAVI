@@ -81,7 +81,7 @@ public class BuildingGuideManager {
             if(bearing < 0){
                 bearing += 360;
             }
-            String str = b.name + "\t" + bearing;
+            String str = b.name + "\t" + bearing + "\t" + b.id;
             result.add(str);
         }
 
