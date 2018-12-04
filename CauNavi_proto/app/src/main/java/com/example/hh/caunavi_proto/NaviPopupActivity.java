@@ -3,6 +3,7 @@ package com.example.hh.caunavi_proto;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
@@ -35,6 +36,8 @@ public class NaviPopupActivity extends Activity {
 
         listView.setAdapter(adapter);
 
+        Log.i("current mode : ", String.valueOf(mode));
+
         if(mode == 0){
             name = new String[] {"정문에서", "후문에서"};
         }else if(mode == 1){
@@ -53,6 +56,8 @@ public class NaviPopupActivity extends Activity {
                     sendResult();
                 }else if(mode == 1){
                     building_ID = Integer.parseInt(name[position].substring(0, 3));
+
+                    Log.i("checkbuild ", String.valueOf(building_ID));
 
                     sendResult();
                 }else if(mode == 2){

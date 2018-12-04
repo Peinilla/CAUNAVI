@@ -175,14 +175,16 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         mode = i.getIntExtra("Mode",-1);
         // -1 : 길찾기, 0 : 캠퍼스투어 , 1 : 자유투어
 
-        campusTourRoute = i.getIntExtra("CampusTourRoute", -1);
-        // 0 : 정문 , 1 : 후문
-        if(campusTourRoute == 0){
-            destinationID = 1;
-            tourIndex = 0;
-        }else{
-            destinationID = 1;
-            tourIndex = tourRoute.length - 1;
+        if (mode == 0) {
+            campusTourRoute = i.getIntExtra("CampusTourRoute", -1);
+            // 0 : 정문 , 1 : 후문
+            if (campusTourRoute == 0) {
+                destinationID = 1;
+                tourIndex = 0;
+            } else {
+                destinationID = 1;
+                tourIndex = tourRoute.length - 1;
+            }
         }
 
         // Set up tap listener.
@@ -689,19 +691,24 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         Matrix.translateM(tMatrix, 0, 0f, 0.2f, -3.0f);
         Matrix.setIdentityM(rMatrix,0);
 
-        Log.i("heading : ", Float.toString(headingAngle));
-        Log.i("dest :", Float.toString(destinationAngle));
         Matrix.setRotateM(rMatrix, 0, headingAngle - destinationAngle, 0f, 1f, 0f);
         Matrix.multiplyMM(tMatrix,0,tMatrix,0,rMatrix,0);
 
-//        float tempAngle = adjustAngle - destinationAngle;
-//        if (tempAngle < 0)
-//            tempAngle += 360;
-//        if (tempAngle > 180)
-//            tempAngle -= 360;
+        Log.i("arrowpitch", String.valueOf(pitchAngle));
+        float tempPitchAngle = pitchAngle; // 땅에 수직 0, 하늘 -180
+        tempPitchAngle += 90;
 
-       // Matrix.setRotateM(rMatrix, 0, pitchAngle * ((90 - tempAngle) / 90), -1.0f, 0.0f, 0.0f);
-        //Matrix.multiplyMM(tMatrix, 0, tMatrix, 0, rMatrix, 0);
+
+        float tempAngle = headingAngle - destinationAngle;
+        if (tempAngle < 0)
+            tempAngle += 360;
+        tempAngle = 180 - Math.abs(tempAngle - 180); // 정면이면 0, 후면이면 180
+
+        tempAngle -= 90; // 정면이면 -90 수직이면 0, 후면이면 90
+
+        Matrix.setRotateM(rMatrix, 0, tempPitchAngle*(tempAngle/90), -1.0f, 0.0f, 0.0f);
+        Matrix.multiplyMM(tMatrix, 0, tMatrix, 0, rMatrix, 0);
+
 
         Matrix.setIdentityM(tempM, 0);
         Matrix.invertM(tempM,0,viewmtx,0);
