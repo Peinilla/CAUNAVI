@@ -691,10 +691,15 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         Matrix.translateM(tMatrix, 0, 0f, 0.2f, -3.0f);
         Matrix.setIdentityM(rMatrix,0);
 
-        Matrix.setRotateM(rMatrix, 0, headingAngle - destinationAngle, 0f, 1f, 0f);
+        float adjustAngle = headingAngle - destinationAngle;
+        if(Math.abs(adjustAngle) < 15){
+            adjustAngle = 0;
+        }
+
+        Matrix.setRotateM(rMatrix, 0, adjustAngle, 0f, 1f, 0f);
         Matrix.multiplyMM(tMatrix,0,tMatrix,0,rMatrix,0);
 
-        Log.i("arrowpitch", String.valueOf(pitchAngle));
+        Log.i("", String.valueOf(pitchAngle));
         float tempPitchAngle = pitchAngle; // 땅에 수직 0, 하늘 -180
         tempPitchAngle += 90;
 
