@@ -47,6 +47,7 @@ public class ListViewAdapter extends BaseAdapter {
 
         image.setImageDrawable(listViewItem.getImg());
         textView.setText(listViewItem.getTitle());
+        textView.setTextSize(20.0f);
 
         return convertView;
     }
