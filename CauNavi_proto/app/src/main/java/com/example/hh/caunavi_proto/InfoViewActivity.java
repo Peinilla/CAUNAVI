@@ -19,6 +19,7 @@ public class InfoViewActivity extends AppCompatActivity {
     private int ID;
     private TextView name;
     private TextView content;
+    private int mode;
 
     private int[] images = new int[3];
     private int[] images2 = new int[2];
@@ -37,6 +38,7 @@ public class InfoViewActivity extends AppCompatActivity {
 
         intent = getIntent();
         tmp = intent.getStringExtra("b_id");
+        mode = intent.getIntExtra("mode",0);
         ID = Integer.parseInt(tmp.substring(0,3));
         bdh = BuildingDataHelper.getInstance(this);
         d = (BuildingData)bdh.getBuildingData(ID);
@@ -75,6 +77,10 @@ public class InfoViewActivity extends AppCompatActivity {
                 startGuide(view);
             }
         });
+
+        if(mode != 1){
+            startGuideButton.setVisibility(View.GONE);
+        }
     }
 
     public void startGuide(View v){

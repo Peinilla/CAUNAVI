@@ -41,7 +41,7 @@ public class InfoActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent intent = new Intent(getApplicationContext(),InfoViewActivity.class);
                 intent.putExtra("b_id",name[position]);
-
+                intent.putExtra("mode",1);
                 startActivity(intent);
             }
         });

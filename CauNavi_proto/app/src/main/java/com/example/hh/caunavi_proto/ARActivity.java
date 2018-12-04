@@ -144,6 +144,8 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
     private int[] tourRoute = {10,102,101,201,204,206,303,207,310,302,301,11};
     private int tourIndex;
 
+    private boolean isEndPopup;
+
     // Anchors created from taps used for object placing with a given color.
     private static class ColoredAnchor {
         public final Anchor anchor;
@@ -181,9 +183,14 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
             if (campusTourRoute == 0) {
                 destinationID = 1;
                 tourIndex = 0;
-            } else {
+            } else if(campusTourRoute ==1){
                 destinationID = 1;
                 tourIndex = tourRoute.length - 1;
+            } else if(campusTourRoute == 2){
+                destinationID = 1;
+                campusTourRoute = 0;
+                tourIndex = 0;
+                tourRoute = new int[]{310,204};
             }
         }
 
@@ -314,7 +321,9 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
                                 if (!mapManager.isArrivalDest()) {
                                 setArrow(mapManager.getNextBearingTest(gps.lat, gps.lon));
                                 } else {
-                                end();
+                                    if(!isEndPopup) {
+                                        end();
+                                    }
                                 }
                             }
                             else if(mode == -1){
@@ -834,6 +843,7 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
     }
 
     public void end(){
+        isEndPopup = true;
         if(mode == -1) {
             onPause();
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -858,7 +868,7 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
             builder.show();
         }else if(mode == 0){
             if(campusTourRoute == 0){
-                if(destinationID == 11){
+                if(tourIndex == tourRoute.length){
                     onPause();
                     AlertDialog.Builder builder = new AlertDialog.Builder(this);
                     builder.setTitle("캠퍼스 투어가 종료 되었습니다.");
@@ -873,7 +883,7 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
                     campusTourNotice();
                 }
             }else{
-                if(destinationID == 10){
+                if(tourIndex == -1){
                     onPause();
                     AlertDialog.Builder builder = new AlertDialog.Builder(this);
                     builder.setTitle("캠퍼스 투어가 종료 되었습니다.");
@@ -898,6 +908,7 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
             builder.setPositiveButton("아니오", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
+                    isEndPopup = false;
                     setDest();
                 }
             });
@@ -907,6 +918,7 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
                     Intent intent = new Intent(getApplicationContext(), InfoViewActivity.class);
                     intent.putExtra("b_id", destinationID + "");
                     startActivity(intent);
+                    isEndPopup = false;
                     setDest();
                 }
             });
@@ -997,7 +1009,6 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
             public void onClick(DialogInterface dialogInterface, int i) {
                 Intent intent = new Intent(getApplicationContext(), InfoViewActivity.class);
                 intent.putExtra("b_id", str[1]);
-
                 startActivity(intent);
             }
         });

@@ -39,7 +39,7 @@ public class NaviPopupActivity extends Activity {
         Log.i("current mode : ", String.valueOf(mode));
 
         if(mode == 0){
-            name = new String[] {"정문에서", "후문에서"};
+            name = new String[] {"정문에서", "후문에서","시연용"};
         }else if(mode == 1){
 
         }

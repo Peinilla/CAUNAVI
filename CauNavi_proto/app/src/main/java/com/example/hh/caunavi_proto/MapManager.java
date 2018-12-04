@@ -23,6 +23,7 @@ public class MapManager {
     private int[][] map;
     private int length;
 
+    private boolean isRealNear;
     private boolean isDestination;
     private static Toast mToast;
 
@@ -148,6 +149,11 @@ public class MapManager {
         }
         if(nearID != -1){
             nearPointID = nearID;
+            if(tempLoc.distanceTo(mapDataArrayList.get(nearPointID).location) > 12){
+                isRealNear = false;
+            }else{
+                isRealNear = true;
+            }
         }
         //위도와 경도를 이용해 현재위치와 가장 가까운 지점의 ID를 설정
     }
@@ -186,7 +192,7 @@ public class MapManager {
 
         int distNext = (int) tempLoc.distanceTo(mapDataArrayList.get(nextPointID).location);
         if(distNext > 12){
-            if(nextPointID != nearPointID && prevPointID != nearPointID){
+            if(nextPointID != nearPointID && prevPointID != nearPointID && !isRealNear){
                 // 경로재탐색
                 reSearchDest();
                 return getNextBearingTest(lat,lon);
@@ -316,7 +322,11 @@ public class MapManager {
     }
 
     public String getNearPoint(){
-        return mapDataArrayList.get(nearPointID).name;
+        if(isRealNear) {
+            return mapDataArrayList.get(nearPointID).name;
+        }else{
+            return mapDataArrayList.get(nearPointID).name + " 근처";
+        }
     }
 
     public boolean isArrivalDest(){
