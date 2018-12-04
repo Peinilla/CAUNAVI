@@ -45,7 +45,10 @@ public class InfoViewActivity extends AppCompatActivity {
         content = (TextView)findViewById(R.id.textView2);
 
         name.setText(""+ ID +"관\n"+d.getName());
+        name.setTextSize(30.0f);
         content.setText(d.getText());
+        content.setTextSize(24.0f);
+
 
         if(ID==209 || ID==304 || ID==309) {
             for (int i = 1; i <= 2; i++) {

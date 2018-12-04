@@ -737,7 +737,7 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
     }
 // 어뎁터뷰
     public void setMenuView(){
-        final String[] items = {"길찾기", "menu2", "menu3"};
+        final String[] items = {"길찾기"};
         ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, items){
             @NonNull
             @Override
@@ -788,6 +788,8 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         if(destinationID != 0) {
             if(mode == -1) {
                 isDestinationSet = true;
+
+                deleteMarker();
 
                 mapManager.setDestination(destinationID, gps.lat, gps.lon);
                 Toast.makeText(this, "" + destinationID + "관으로", Toast.LENGTH_SHORT).show();
@@ -844,11 +846,11 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
             float buildingAngle = Float.parseFloat(str[1]);
             float angle = buildingAngle - headingAngle;
 
-            if (angle > 300) {
+            if (angle > 315) {
                 angle -= 360;
             }
             Log.i("buildingNum : ", str[0]+"buildingAngle"+ buildingAngle+", headngangle : "+headingAngle+", angle :"+angle);
-            if(Math.abs(angle) < 60) {
+            if(Math.abs(angle) < 45) {
                 markerList.get(inx).setVisibility(View.VISIBLE);
                 RelativeLayout.LayoutParams layoutParamValue= (RelativeLayout.LayoutParams) markerList.get(inx).getLayoutParams();
                 layoutParamValue.leftMargin = getDp(angle);
@@ -857,6 +859,13 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         }
 
     }
+
+    public void deleteMarker(){
+        for(int inx = 0; inx < markerList.size(); inx ++) {
+            markerList.get(inx).setVisibility(View.GONE);
+        }
+    }
+
     public float convertAngle(float destinationAngle){
         float adjustAngle = AngleAdjustment();
         float headRotateAngle = destinationAngle - adjustAngle;
