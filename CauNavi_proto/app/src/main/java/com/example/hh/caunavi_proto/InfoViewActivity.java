@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -39,15 +40,23 @@ public class InfoViewActivity extends AppCompatActivity {
         intent = getIntent();
         tmp = intent.getStringExtra("b_id");
         mode = intent.getIntExtra("mode",0);
-        ID = Integer.parseInt(tmp.substring(0,3));
+        if(tmp.equals("666"))
+            ID = 666;
+        else
+            ID = Integer.parseInt(tmp.substring(0,3));
         bdh = BuildingDataHelper.getInstance(this);
         d = (BuildingData)bdh.getBuildingData(ID);
 
         name = (TextView)findViewById(R.id.textView);
         content = (TextView)findViewById(R.id.textView2);
 
-        name.setText(""+ ID +"관\n"+d.getName());
+        if(ID==666)
+            name.setText("의혈탑");
+        else
+            name.setText(""+ ID +"관\n"+d.getName());
         name.setTextSize(30.0f);
+
+        //Log.i("uihyeol",d.getText());
 
         content.setText(d.getText());
         content.setTextSize(24.0f);

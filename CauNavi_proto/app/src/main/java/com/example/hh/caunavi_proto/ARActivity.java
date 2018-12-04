@@ -992,9 +992,11 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
         Button b = (Button)v;
         final String[] str = b.getText().toString().split("\n");
 
+        /*
         if(str.length == 1){
             return;
         }
+        */
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("");
@@ -1008,7 +1010,10 @@ public class ARActivity extends AppCompatActivity implements GLSurfaceView.Rende
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 Intent intent = new Intent(getApplicationContext(), InfoViewActivity.class);
-                intent.putExtra("b_id", str[1]);
+                if (str[0].equals("의혈탑"))
+                    intent.putExtra("b_id","666");
+                else
+                    intent.putExtra("b_id", str[1]);
                 startActivity(intent);
             }
         });
