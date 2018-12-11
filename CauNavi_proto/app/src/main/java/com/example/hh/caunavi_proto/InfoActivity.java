@@ -6,9 +6,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.ListView;
-import android.widget.TextView;
+
+import com.example.hh.caunavi_proto.common.helpers.ListViewAdapter;
 
 public class InfoActivity extends AppCompatActivity {
 
@@ -41,7 +41,7 @@ public class InfoActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent intent = new Intent(getApplicationContext(),InfoViewActivity.class);
                 intent.putExtra("b_id",name[position]);
-
+                intent.putExtra("mode",1);
                 startActivity(intent);
             }
         });

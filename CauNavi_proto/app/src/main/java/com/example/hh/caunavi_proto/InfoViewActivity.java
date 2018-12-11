@@ -1,29 +1,17 @@
 package com.example.hh.caunavi_proto;
 
 import android.content.Intent;
-import android.content.res.AssetManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewParent;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.hh.caunavi_proto.common.helpers.Adapter;
 import com.example.hh.caunavi_proto.common.helpers.BuildingDataHelper;
 import com.example.hh.caunavi_proto.common.helpers.BuildingData;
-
-
-
-import com.example.hh.caunavi_proto.R;
-
-import org.w3c.dom.Text;
-
-import java.io.InputStream;
 
 public class InfoViewActivity extends AppCompatActivity {
 
@@ -32,6 +20,7 @@ public class InfoViewActivity extends AppCompatActivity {
     private int ID;
     private TextView name;
     private TextView content;
+    private int mode;
 
     private int[] images = new int[3];
     private int[] images2 = new int[2];
@@ -50,15 +39,27 @@ public class InfoViewActivity extends AppCompatActivity {
 
         intent = getIntent();
         tmp = intent.getStringExtra("b_id");
-        ID = Integer.parseInt(tmp.substring(0,3));
+        mode = intent.getIntExtra("mode",0);
+        if(tmp.equals("666"))
+            ID = 666;
+        else
+            ID = Integer.parseInt(tmp.substring(0,3));
         bdh = BuildingDataHelper.getInstance(this);
         d = (BuildingData)bdh.getBuildingData(ID);
 
         name = (TextView)findViewById(R.id.textView);
         content = (TextView)findViewById(R.id.textView2);
 
-        name.setText(""+ ID +"관\n"+d.getName());
+        if(ID==666)
+            name.setText("의혈탑");
+        else
+            name.setText(""+ ID +"관\n"+d.getName());
+        name.setTextSize(30.0f);
+
+        //Log.i("uihyeol",d.getText());
+
         content.setText(d.getText());
+        content.setTextSize(24.0f);
 
         if(ID==209 || ID==304 || ID==309) {
             for (int i = 1; i <= 2; i++) {
@@ -78,10 +79,6 @@ public class InfoViewActivity extends AppCompatActivity {
             }
         }
 
-
-
-
-
         startGuideButton = (Button)findViewById(R.id.startGuideButton);
         startGuideButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -89,6 +86,10 @@ public class InfoViewActivity extends AppCompatActivity {
                 startGuide(view);
             }
         });
+
+        if(mode != 1){
+            startGuideButton.setVisibility(View.GONE);
+        }
     }
 
     public void startGuide(View v){

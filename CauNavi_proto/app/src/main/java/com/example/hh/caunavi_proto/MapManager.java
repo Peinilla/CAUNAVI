@@ -1,15 +1,10 @@
 package com.example.hh.caunavi_proto;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.AssetManager;
 import android.location.Location;
 import android.util.Log;
-import android.widget.ArrayAdapter;
 import android.widget.Toast;
-
-import com.example.hh.caunavi_proto.common.helpers.SnackbarHelper;
-
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -21,8 +16,6 @@ public class MapManager {
     private ArrayList<mapData> mapDataArrayList = new ArrayList<>();
     private ArrayList<Integer> route = new ArrayList<>();
 
-    private final SnackbarHelper messageSnackbarHelper = new SnackbarHelper();
-
     private int destinationID;
     private int nearPointID;
     private int nextPointID;
@@ -30,6 +23,7 @@ public class MapManager {
     private int[][] map;
     private int length;
 
+    private boolean isRealNear;
     private boolean isDestination;
     private static Toast mToast;
 
@@ -47,7 +41,7 @@ public class MapManager {
         Toast mToast = new Toast(mContext.getApplicationContext());
 
         try{
-            is = am.open("map/new_map3.txt");
+            is = am.open("map/new_map.txt");
             BufferedReader bufrd = new BufferedReader(new InputStreamReader(is,"UTF-8"));
 
             String line = bufrd.readLine();
@@ -91,7 +85,7 @@ public class MapManager {
         init();
     }
     public void init() {
-        destinationID = 0;
+        destinationID = -1;
         nearPointID = 0;
         nextPointID = 0;
         prevPointID = 0;
@@ -100,17 +94,20 @@ public class MapManager {
 
     public void setDestination(int destination, double lat, double lon){
         setNearPointID(lat,lon);
-        this.destinationID = getDestinationID(destination);
+        destinationID = getDestinationID(destination);
         nextPointID = nearPointID;
         prevPointID = nearPointID;
+
+        if(destinationID == -1){
+            isDestination = false;
+            return;
+        }
 
         route = new ArrayList<>();
         route = getRoute(nearPointID,destinationID);
         if(mToast != null) {
             mToast.cancel();
         }
-        mToast = Toast.makeText(mContext.getApplicationContext(),destination +"관까지 안내를 시작합니다.", Toast.LENGTH_LONG);
-        mToast.show();
         Log.i("test", "near : " + nearPointID + "/lat : " + lat);
 
         Log.i("test", route.toString());
@@ -129,8 +126,6 @@ public class MapManager {
         }
         mToast = Toast.makeText(mContext.getApplicationContext(),"경로 재탐색중", Toast.LENGTH_LONG);
         mToast.show();
-
-        isDestination = true;
 
         Log.i("test", "near : " + nearPointID);
 
@@ -154,6 +149,11 @@ public class MapManager {
         }
         if(nearID != -1){
             nearPointID = nearID;
+            if(tempLoc.distanceTo(mapDataArrayList.get(nearPointID).location) > 12){
+                isRealNear = false;
+            }else{
+                isRealNear = true;
+            }
         }
         //위도와 경도를 이용해 현재위치와 가장 가까운 지점의 ID를 설정
     }
@@ -173,11 +173,6 @@ public class MapManager {
             } else{
                 String nameNext = mapDataArrayList.get(nextPointID).name;
                 float bearing = tempLoc.bearingTo(mapDataArrayList.get(nextPointID).location);
-                if(mToast != null) {
-                    mToast.cancel();
-                }
-                mToast = Toast.makeText(mContext.getApplicationContext(),nameNext + "/" + distNext + "m"  , Toast.LENGTH_SHORT);
-                //mToast.show();
                 return bearing;
             }
         }else{
@@ -197,7 +192,7 @@ public class MapManager {
 
         int distNext = (int) tempLoc.distanceTo(mapDataArrayList.get(nextPointID).location);
         if(distNext > 12){
-            if(nextPointID != nearPointID && prevPointID != nearPointID){
+            if(nextPointID != nearPointID && prevPointID != nearPointID && !isRealNear){
                 // 경로재탐색
                 reSearchDest();
                 return getNextBearingTest(lat,lon);
@@ -206,21 +201,19 @@ public class MapManager {
                 String namePrev = mapDataArrayList.get(prevPointID).name;
                 String nameNext = mapDataArrayList.get(nextPointID).name;
                 float bearing = tempLoc.bearingTo(mapDataArrayList.get(nextPointID).location);
-                if(mToast != null) {
-                    mToast.cancel();
+
+                if(bearing < 0){
+                    bearing += 360;
                 }
-                mToast = Toast.makeText(mContext.getApplicationContext(),nameNext + "\n" + distNext + "m"  , Toast.LENGTH_SHORT);
-                mToast.show();
                 return bearing;
             }else{
                 String namePrev = mapDataArrayList.get(prevPointID).name;
                 String nameNext = mapDataArrayList.get(nextPointID).name;
                 float bearing = mapDataArrayList.get(prevPointID).location.bearingTo(mapDataArrayList.get(nextPointID).location);
-                if(mToast != null) {
-                    mToast.cancel();
+
+                if(bearing < 0){
+                    bearing += 360;
                 }
-                mToast = Toast.makeText(mContext.getApplicationContext(),namePrev + "->" + nameNext + "\n" + distNext + "m"  , Toast.LENGTH_SHORT);
-                mToast.show();
                 return bearing;
             }
         }else{
@@ -231,6 +224,9 @@ public class MapManager {
             }
             else{
                 float bearing = mapDataArrayList.get(prevPointID).location.bearingTo(mapDataArrayList.get(nextPointID).location);
+                if(bearing < 0){
+                    bearing += 360;
+                }
                 return bearing;
             }
         }
@@ -267,7 +263,8 @@ public class MapManager {
         }catch (Exception e){
             Log.i("test",e.getMessage());
         }
-        return 0;
+
+        return -1;
     }
 
     public ArrayList<Integer> getRoute(int start, int end) {
@@ -325,7 +322,11 @@ public class MapManager {
     }
 
     public String getNearPoint(){
-        return mapDataArrayList.get(nearPointID).name;
+        if(isRealNear) {
+            return mapDataArrayList.get(nearPointID).name;
+        }else{
+            return mapDataArrayList.get(nearPointID).name + " 근처";
+        }
     }
 
     public boolean isArrivalDest(){
