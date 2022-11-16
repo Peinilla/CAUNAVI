@@ -1,5 +1,7 @@
 package com.example.hh.caunavi_proto.common.helpers;
 
+// other test_1
+
 import android.graphics.drawable.Drawable;
 
 public class ListVO {
